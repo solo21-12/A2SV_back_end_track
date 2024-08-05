@@ -6,14 +6,137 @@ import (
 	"fmt"
 )
 
+const BORROWED string = "Borrowed"
+const AVAILABLE string = "Available"
+
+func getBook(bookID int) (models.Book, bool) {
+	book, exists := data.OurLibrary.Books[bookID]
+	return book, exists
+}
+
+func getMemeber(memberID int) (models.Member, bool) {
+	member, exist := data.OurLibrary.Members[memberID]
+
+	return member, exist
+}
+
+func checkBookBorrowed(book models.Book, member models.Member) (int, bool) {
+
+	for i, cur_book := range member.BorrowedBooks {
+		if cur_book == book {
+			return i, true
+		}
+	}
+
+	return -1, false
+}
+
 func AddBook(book models.Book) {
 
-	_, value := data.OurLibrary.Books[book.ID]
+	_, exists := getBook(book.ID)
 
-	if value {
+	if exists {
 		fmt.Println("The book with the given inforamtion already exists")
 	} else {
 		data.OurLibrary.Books[book.ID] = book
 	}
+}
 
+func RemoveBook(bookID int) {
+	_, exists := getBook(bookID)
+
+	if exists {
+		delete(data.OurLibrary.Books, bookID)
+	} else {
+		fmt.Println("The book with the given ID does not exist")
+	}
+}
+
+func BorrowBook(bookID int, memberID int) error {
+	// check if the book exists
+	book, bookExists := getBook(bookID)
+
+	// check if the member exists
+	member, memberExist := getMemeber(memberID)
+
+	if !bookExists {
+		return fmt.Errorf("the book with the given ID does not exist")
+	}
+
+	if !memberExist {
+		return fmt.Errorf("the member with the given ID does not exist")
+	}
+
+	book.Status = BORROWED
+	data.OurLibrary.Books[book.ID] = book
+	member.BorrowedBooks = append(member.BorrowedBooks, book)
+	data.OurLibrary.Members[member.ID] = member
+
+	return nil
+}
+
+func ReturnBook(bookID int, memberID int) error {
+	// check if the book exists
+	book, bookExists := getBook(bookID)
+
+	// check if the member exists
+	member, memberExist := getMemeber(memberID)
+
+	if !bookExists {
+		return fmt.Errorf("the book with the given ID does not exist")
+	}
+
+	if book.Status != BORROWED {
+		return fmt.Errorf("the book with the given ID hasn't been borrowed")
+	}
+
+	if !memberExist {
+		return fmt.Errorf("the member with the given ID does not exist")
+	}
+
+	index, borrowed := checkBookBorrowed(book, member)
+
+	if !borrowed {
+		return fmt.Errorf("the given member hasn't borrowed the given book")
+	}
+
+	book.Status = AVAILABLE
+	data.OurLibrary.Books[book.ID] = book
+	member.BorrowedBooks = append(member.BorrowedBooks[:index], member.BorrowedBooks[index+1:]...)
+	data.OurLibrary.Members[memberID] = member
+
+	return nil
+}
+
+func ListAvailableBooks() []models.Book {
+	availableBooks := []models.Book{}
+
+	for _, book := range data.OurLibrary.Books {
+		if book.Status == AVAILABLE {
+			availableBooks = append(availableBooks, book)
+		}
+	}
+
+	return availableBooks
+}
+
+func ListBorrowedBooks(memberID int) []models.Book {
+	member, exist := getMemeber(memberID)
+
+	if !exist {
+		return make([]models.Book, 0)
+	}
+
+	return member.BorrowedBooks
+}
+
+func AddMember(member models.Member) {
+	// This method add a new member to our library
+	_, exist := getMemeber(member.ID)
+
+	if exist {
+		fmt.Println("The user with the given information already exists")
+	} else {
+		data.OurLibrary.Members[member.ID] = member
+	}
 }
