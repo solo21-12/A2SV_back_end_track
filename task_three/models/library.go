@@ -1,6 +1,6 @@
 package models
 
 type Library struct {
-	books   map[int]Book
-	members map[int]Member
+	Books   map[int]Book
+	Members map[int]Member
 }
