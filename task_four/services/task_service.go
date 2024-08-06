@@ -24,7 +24,8 @@ func GetTaskByID(taskID string) (model.Task, error) {
 func CreateTask(newTask model.Task) error {
 	_, err := GetTaskByID(newTask.ID)
 
-	if err == nil { // Task exists
+	// Task exists
+	if err == nil {
 		return fmt.Errorf("the task already exists")
 	}
 
@@ -34,15 +35,41 @@ func CreateTask(newTask model.Task) error {
 	return nil
 }
 
-
 func DeleteTask(taskID string) error {
 	for i, task := range data.Tasks {
 		if task.ID == taskID {
 			data.Tasks = append(data.Tasks[:i], data.Tasks[i+1:]...)
 			return nil
-
 		}
 	}
 
 	return fmt.Errorf("the task with the given id not found")
+}
+
+func UpdateTask(taskID string, updatedTask model.Task) (error, model.Task) {
+
+	for i, task := range data.Tasks {
+		if task.ID == taskID {
+
+			if updatedTask.Title != "" {
+				data.Tasks[i].Title = updatedTask.Title
+			}
+
+			if updatedTask.Description != "" {
+				data.Tasks[i].Description = updatedTask.Description
+			}
+
+			if updatedTask.Status != "" {
+				data.Tasks[i].Status = updatedTask.Status
+			}
+
+			if !updatedTask.DueDate.IsZero() {
+				data.Tasks[i].DueDate = updatedTask.DueDate
+			}
+
+			return nil, data.Tasks[i]
+		}
+	}
+
+	return fmt.Errorf("task with the given id not found"), model.Task{}
 }

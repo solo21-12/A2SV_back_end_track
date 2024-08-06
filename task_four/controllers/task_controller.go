@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"example.com/task_manager_api/model"
 	"example.com/task_manager_api/services"
@@ -21,7 +20,7 @@ func GetTaskByIDController(ctx *gin.Context) {
 	task, err := services.GetTaskByID(id)
 
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"Message": "The task with the given id not found"})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -52,9 +51,30 @@ func DeleteTaskController(ctx *gin.Context) {
 	err := services.DeleteTask(id)
 
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"Message": err})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.IndentedJSON(http.StatusNoContent, model.Task{})
+}
+
+func UpdateTaskController(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var updatedTask model.Task
+
+	if err := ctx.BindJSON(&updatedTask); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+		return
+	}
+
+	err, updatedTask := services.UpdateTask(id, updatedTask)
+
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, updatedTask)
+
 }
