@@ -1,8 +1,9 @@
-package services
+package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"example.com/task_manager_api/model"
 	"example.com/task_manager_api/services"
@@ -32,13 +33,13 @@ func PostTaskController(ctx *gin.Context) {
 	var newTask model.Task
 
 	if err := ctx.BindJSON(&newTask); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	exist := services.CreateTask(newTask)
-
-	if exist != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, exist)
+	err := services.CreateTask(newTask)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

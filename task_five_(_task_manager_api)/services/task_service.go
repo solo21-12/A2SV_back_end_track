@@ -24,14 +24,16 @@ func GetTaskByID(taskID string) (model.Task, error) {
 func CreateTask(newTask model.Task) error {
 	_, err := GetTaskByID(newTask.ID)
 
-	if err != nil {
+	if err == nil { // Task exists
 		return fmt.Errorf("the task already exists")
 	}
 
+	// Add new task
 	data.Tasks = append(data.Tasks, newTask)
 
 	return nil
 }
+
 
 func DeleteTask(taskID string) error {
 	for i, task := range data.Tasks {
