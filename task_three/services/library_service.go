@@ -139,12 +139,12 @@ func ListAvailableBooks() []models.Book {
 	return availableBooks
 }
 
-func ListBorrowedBooks(memberID int) []models.Book {
+func ListBorrowedBooks(memberID int) ([]models.Book, error) {
 	member, exist := getMember(memberID)
 
 	if !exist {
-		return make([]models.Book, 0)
+		return make([]models.Book, 0), fmt.Errorf("member with the given ID not found")
 	}
 
-	return member.BorrowedBooks
+	return member.BorrowedBooks, nil
 }

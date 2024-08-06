@@ -16,6 +16,11 @@ const (
 	AVAILABLE = "Available"
 )
 
+func separetor() {
+	fmt.Println("*************************************************")
+
+}
+
 func getInput(prompt string, reader *bufio.Reader) (string, error) {
 	// This methods accepts users input
 	fmt.Print(prompt)
@@ -97,6 +102,8 @@ func AddBookController(reader *bufio.Reader) {
 		fmt.Println("The book has been successfully added")
 	}
 
+	separetor()
+
 }
 
 func AddMemberController(reader *bufio.Reader) {
@@ -118,6 +125,8 @@ func AddMemberController(reader *bufio.Reader) {
 		fmt.Println("The member has been successfully added")
 	}
 
+	separetor()
+
 }
 
 func RemoveBookController(reader *bufio.Reader) {
@@ -137,6 +146,9 @@ func RemoveBookController(reader *bufio.Reader) {
 		}
 
 	}
+
+	separetor()
+
 }
 
 func BorrowBookController(reader *bufio.Reader) {
@@ -158,6 +170,8 @@ func BorrowBookController(reader *bufio.Reader) {
 			fmt.Println("Book borrowed successfully.")
 		}
 	}
+
+	separetor()
 
 }
 
@@ -182,6 +196,8 @@ func ReturnBookController(reader *bufio.Reader) {
 		}
 	}
 
+	separetor()
+
 }
 
 func ListAvailableBooksController() {
@@ -199,6 +215,8 @@ func ListAvailableBooksController() {
 		}
 	}
 
+	separetor()
+
 }
 
 func ListBorrowedBooksController(reader *bufio.Reader) {
@@ -210,8 +228,10 @@ func ListBorrowedBooksController(reader *bufio.Reader) {
 		return
 	}
 
-	books := services.ListBorrowedBooks(memberID)
-	if len(books) == 0 {
+	books, err := services.ListBorrowedBooks(memberID)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	} else if len(books) == 0 {
 		fmt.Println("No books have been borrowed by the given member")
 	} else {
 		fmt.Printf("Member ID: %-15v", memberID)
@@ -222,4 +242,7 @@ func ListBorrowedBooksController(reader *bufio.Reader) {
 			fmt.Printf("%-10v %-10v %-10v %10v \n", book.ID, book.Title, book.Author, book.Status)
 		}
 	}
+
+	separetor()
+
 }
