@@ -206,6 +206,7 @@ func ListAvailableBooksController() {
 
 	if len(books) == 0 {
 		fmt.Println("No books have been added to the library")
+		return
 	} else {
 		fmt.Println("Available Books:")
 		fmt.Println("*************************************************")
