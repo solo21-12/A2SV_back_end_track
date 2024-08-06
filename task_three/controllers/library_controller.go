@@ -11,10 +11,13 @@ import (
 	"example.com/task_three/services"
 )
 
-const BORROWED string = "Borrowed"
-const AVAILABLE string = "Available"
+const (
+	BORROWED  = "Borrowed"
+	AVAILABLE = "Available"
+)
 
 func getInput(prompt string, reader *bufio.Reader) (string, error) {
+	// This methods accepts users input
 	fmt.Print(prompt)
 	input, err := reader.ReadString('\n')
 
@@ -26,6 +29,7 @@ func getInput(prompt string, reader *bufio.Reader) (string, error) {
 }
 
 func parseStr(input string) (int, error) {
+	// This method parses the given string to int
 	res, err := strconv.Atoi(input)
 
 	return res, err
@@ -33,36 +37,45 @@ func parseStr(input string) (int, error) {
 }
 
 func generateNewBookID() int {
+	// This method generates a new book id
 	return len(data.OurLibrary.Books) + 1
 }
 
 func generateNewMemberID() int {
-	return len(data.OurLibrary.Members)
+	// This method generates a new member id
+	return len(data.OurLibrary.Members) + 1
 }
 
-func getMemberAndBook(reader *bufio.Reader) (int, int, error) {
-	bid, _ := getInput("Enter Book ID to borrow: ", reader)
-	mid, _ := getInput("Enter Member ID: ", reader)
-
+func getBookID(reader *bufio.Reader) (int, error) {
+	// This method accepts book's id
+	bid, _ := getInput("Enter Book ID: ", reader)
 	bookID, bErr := parseStr(bid)
-	memberID, mErr := parseStr(mid)
 
 	if bErr != nil {
 		fmt.Println("Invalid Book ID:", bErr)
-		return -1, -1, bErr
+		return -1, bErr
 	}
 
-	if mErr != nil {
-		fmt.Println("Invalid Member ID:", mErr)
-		return -1, -1, mErr
-
-	}
-
-	return bookID, memberID, nil
+	return bookID, nil
 
 }
 
-func AddBook(reader *bufio.Reader) {
+func getMemberID(reader *bufio.Reader) (int, error) {
+	// The method accepts member's id
+	mid, _ := getInput("Enter Member ID: ", reader)
+
+	memberID, mErr := parseStr(mid)
+
+	if mErr != nil {
+		fmt.Println("Invalid Member ID:", mErr)
+		return -1, mErr
+	}
+
+	return memberID, nil
+
+}
+
+func AddBookController(reader *bufio.Reader) {
 	// This method adds a new book to our library
 
 	title, _ := getInput("Book title: ", reader)
@@ -86,7 +99,7 @@ func AddBook(reader *bufio.Reader) {
 
 }
 
-func AddMember(reader *bufio.Reader) {
+func AddMemberController(reader *bufio.Reader) {
 	// This method adds a new member to our library
 
 	ID := generateNewMemberID()
@@ -107,24 +120,35 @@ func AddMember(reader *bufio.Reader) {
 
 }
 
-func RemoveBook(reader *bufio.Reader) {
-	id, _ := getInput("Enter Book ID to remove: ", reader)
-	bookID, _ := strconv.Atoi(id)
-	err := services.RemoveBook(bookID)
+func RemoveBookController(reader *bufio.Reader) {
+	// The method removes a borrowed book from a members list adn change the status of the book
+	bookID, e := getBookID(reader)
 
-	if err != nil {
-		fmt.Println("Error removing book:", err)
+	if e != nil {
+		fmt.Printf("Error: %v", e)
+
 	} else {
-		fmt.Println("Book removed successfully.")
+		err := services.RemoveBook(bookID)
+
+		if err != nil {
+			fmt.Println("Error removing book:", err)
+		} else {
+			fmt.Println("Book removed successfully.")
+		}
+
 	}
 }
 
-func BorrowBook(reader *bufio.Reader) {
+func BorrowBookController(reader *bufio.Reader) {
+	// This method handles the borrowing of a book
+	bookID, e := getBookID(reader)
+	memberID, em := getMemberID(reader)
 
-	bookID, memberID, cur_err := getMemberAndBook(reader)
+	if e != nil {
+		fmt.Println("Error while getting information", e)
 
-	if cur_err != nil {
-		fmt.Println("Error while getting information", cur_err)
+	} else if em != nil {
+		fmt.Println("Error while getting information", em)
 	} else {
 		err := services.BorrowBook(bookID, memberID)
 
@@ -137,11 +161,17 @@ func BorrowBook(reader *bufio.Reader) {
 
 }
 
-func ReturnBook(reader *bufio.Reader) {
-	bookID, memberID, cur_err := getMemberAndBook(reader)
+func ReturnBookController(reader *bufio.Reader) {
+	// This method handles the returning of a book
 
-	if cur_err != nil {
-		fmt.Println("Error while getting information", cur_err)
+	bookID, e := getBookID(reader)
+	memberID, em := getMemberID(reader)
+
+	if e != nil {
+		fmt.Println("Error while getting information", e)
+
+	} else if em != nil {
+		fmt.Println("Error while getting information", em)
 	} else {
 		err := services.ReturnBook(bookID, memberID)
 
@@ -154,20 +184,27 @@ func ReturnBook(reader *bufio.Reader) {
 
 }
 
-func ListAvailableBooks() {
+func ListAvailableBooksController() {
+	// This method retunr the list of available books
 	books := services.ListAvailableBooks()
-	fmt.Println("Available Books:")
-	fmt.Println("*************************************************")
-	fmt.Printf("%-10v %-10v %-10v %10v \n", "ID", "Title", "Author", "Status")
 
-	for _, book := range books {
-		fmt.Printf("%-10v %-10v %-10v %10v \n", book.ID, book.Title, book.Author, book.Status)
+	if len(books) == 0 {
+		fmt.Println("No books have been added to the library")
+	} else {
+		fmt.Println("Available Books:")
+		fmt.Println("*************************************************")
+		fmt.Printf("%-10v %-10v %-10v %10v \n", "ID", "Title", "Author", "Status")
+		for _, book := range books {
+			fmt.Printf("%-10v %-10v %-10v %10v \n", book.ID, book.Title, book.Author, book.Status)
+		}
 	}
+
 }
 
-func ListBorrowedBooks(reader *bufio.Reader) {
-	mid, _ := getInput("Enter Member ID: ", reader)
-	memberID, err := parseStr(mid)
+func ListBorrowedBooksController(reader *bufio.Reader) {
+	// This method returns the list of books borrowed by a specifc member
+	memberID, err := getMemberID(reader)
+
 	if err != nil {
 		fmt.Println("Invalid Member ID:", err)
 		return
@@ -177,6 +214,7 @@ func ListBorrowedBooks(reader *bufio.Reader) {
 	if len(books) == 0 {
 		fmt.Println("No books have been borrowed by the given member")
 	} else {
+		fmt.Printf("Member ID: %-15v", memberID)
 		fmt.Println("Borrowed Books:")
 		fmt.Println("*************************************************")
 		fmt.Printf("%-10v %-10v %-10v %10v \n", "ID", "Title", "Author", "Status")
