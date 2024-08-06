@@ -36,6 +36,11 @@ func PostTaskController(ctx *gin.Context) {
 		return
 	}
 
+	if err := newTask.Validate(); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Validation failed: " + err.Error()})
+		return
+	}
+
 	err := services.CreateTask(newTask)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -71,7 +76,7 @@ func UpdateTaskController(ctx *gin.Context) {
 	err, updatedTask := services.UpdateTask(id, updatedTask)
 
 	if err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
