@@ -26,7 +26,7 @@ func checkPalindrome(s string) bool {
 	cur_word := ""
 	for _, word := range s {
 		if unicode.IsLetter(word) || unicode.IsNumber(word) {
-			cur_word += string(word)
+			cur_word += strings.ToLower(string(word))
 		}
 	}
 
