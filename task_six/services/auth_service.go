@@ -8,7 +8,6 @@ import (
 
 	"example.com/task_manager_api/model"
 	"github.com/dgrijalva/jwt-go"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -93,8 +92,7 @@ func GetClaims(authHeader string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func LoginUser(user model.UserLogin, db *mongo.Database, ctx context.Context) (model.Auth, error) {
-	userService := NewUserService(db)
+func LoginUser(user model.UserLogin, userService UserService, ctx context.Context) (model.Auth, error) {
 
 	curUser, err := userService.GetUser(ctx, user.Email)
 	if err != nil {

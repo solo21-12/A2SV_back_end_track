@@ -58,5 +58,22 @@ func (u *UserController) RegisterUser(ctx *gin.Context) {
 			Role:  curUser.Role,
 		},
 	})
+}
 
+func (u *UserController) LoginUser(ctx *gin.Context) {
+	var user model.UserLogin
+
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid data"})
+		return
+	}
+
+	res, err := services.LoginUser(user, *u.service, ctx)
+
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, res)
 }
