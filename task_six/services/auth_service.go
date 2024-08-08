@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"example.com/task_manager_api/model"
-                                                                                                     	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,11 +24,8 @@ func getJwtSecret() (string, error) {
 }
 
 func valildatePassword(user model.User, password string) bool {
-	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
-		return false
-	}
+	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) == nil
 
-	return true
 }
 
 func GenerateToken(user model.User) (string, error) {
@@ -139,6 +136,6 @@ func LoginUser(user model.UserLogin, db *mongo.Database, ctx context.Context) (m
 
 	return model.Auth{
 		User:  user,
-		Token: token,}, nil
+		Token: token}, nil
 
 }
