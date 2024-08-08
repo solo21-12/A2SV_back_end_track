@@ -10,7 +10,7 @@ import (
 var validate *validator.Validate
 
 type Task struct {
-	ID          primitive.ObjectID `json:"id" bson:"_id"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Title       string             `json:"title" binding:"required"`
 	Description string             `json:"description"`
 	DueDate     time.Time          `json:"due_date"`

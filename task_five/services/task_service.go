@@ -67,7 +67,7 @@ func (task *TaskService) GetTaskByID(taskID string, ctx context.Context) (model.
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return model.Task{}, fmt.Errorf("task with the given ID not found: %v", err)
+			return model.Task{}, fmt.Errorf("task with the given ID not found")
 		}
 		return model.Task{}, fmt.Errorf("error retrieving task: %v", err)
 	}
@@ -102,15 +102,10 @@ func (task *TaskService) DeleteTask(taskID string, ctx context.Context) (*mongo.
 	return deleteRes, nil
 }
 
-func (task *TaskService) UpdateTask(taskID string, updatedTask model.Task, ctx context.Context) (*mongo.UpdateResult, error) {
-	// Convert taskID to ObjectId if necessary
-	objectID, err := primitive.ObjectIDFromHex(taskID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid task ID format: %v", err)
-	}
+func (task *TaskService) UpdateTask(taskID primitive.ObjectID, updatedTask model.Task, ctx context.Context) (*mongo.UpdateResult, error) {
 
 	// Create the filter to find the document to update
-	filter := bson.D{{Key: "_id", Value: objectID}}
+	filter := bson.D{{Key: "_id", Value: taskID}}
 
 	// Define the update operation using $set to update only the specified fields
 	update := bson.D{{Key: "$set", Value: updatedTask}}

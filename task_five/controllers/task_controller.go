@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"example.com/task_manager_api/model"
 	"example.com/task_manager_api/services"
@@ -90,18 +91,25 @@ func (t *TaskController) UpdateTaskController(ctx *gin.Context) {
 
 	var updatedTask model.Task
 
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format: " + err.Error()})
+		return
+	}
+
 	if err := ctx.BindJSON(&updatedTask); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
 
-	updatedResult, err := t.service.UpdateTask(id, updatedTask, context.TODO())
+	updatedResult, err := t.service.UpdateTask(objectID, updatedTask, context.TODO())
 
 	if err != nil {
 		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
+	updatedTask.ID = objectID
 	if updatedResult.MatchedCount > 0 && updatedResult.ModifiedCount > 0 {
 		ctx.IndentedJSON(http.StatusOK, updatedTask)
 		return
