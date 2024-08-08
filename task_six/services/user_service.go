@@ -7,6 +7,7 @@ import (
 	"example.com/task_manager_api/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -17,6 +18,12 @@ func NewUserService(db *mongo.Database) *UserService {
 	return &UserService{
 		collection: db.Collection("users"),
 	}
+}
+
+func generatePassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hashedPassword), err
+
 }
 
 func (u *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
@@ -84,6 +91,14 @@ func (u *UserService) CreateUser(ctx context.Context, user model.User) (*mongo.I
 	} else {
 		user.Role = "user"
 	}
+
+	hashedPassword, pErr := generatePassword(user.Password)
+
+	if pErr != nil {
+		return nil, fmt.Errorf("internal server error")
+	}
+
+	user.Password = hashedPassword
 
 	insertRes, err := u.collection.InsertOne(ctx, user)
 
