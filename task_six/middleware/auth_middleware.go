@@ -63,7 +63,7 @@ func RoleBasedMiddleWare(roles ...string) gin.HandlerFunc {
 			}
 
 			if !authrized {
-				ctx.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+				ctx.JSON(http.StatusForbidden, gin.H{"error": "Forbidden only admin user can perform this action"})
 				ctx.Abort()
 				return
 			}

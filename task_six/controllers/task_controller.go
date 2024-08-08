@@ -64,7 +64,15 @@ func (t *TaskController) PostTaskController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusCreated, gin.H{"created task": insertResult.InsertedID})
+	objectID, ok := insertResult.InsertedID.(primitive.ObjectID)
+
+	if !ok {
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+	createdTask, _ := t.service.GetTaskByID(objectID.Hex(), ctx)
+
+	ctx.IndentedJSON(http.StatusCreated, gin.H{"created task": createdTask})
 }
 
 func (t *TaskController) DeleteTaskController(ctx *gin.Context) {
