@@ -13,6 +13,7 @@ func Run() {
 
 	taskService := services.NewTaskService(db)
 	taskController := controller.NewTaskController(taskService)
+	
 	router := gin.Default()
 	router.GET("/tasks", taskController.GetTasksController)
 	router.GET("/tasks/:id", taskController.GetTaskByIDController)
