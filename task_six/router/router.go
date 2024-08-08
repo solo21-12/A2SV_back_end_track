@@ -25,6 +25,7 @@ func Run() {
 	router.DELETE("/tasks/:id", taskController.DeleteTaskController)
 
 	router.POST("/register", userController.RegisterUser)
+	router.POST("/login", userController.LoginUser)
 
 	router.Run(":8081")
 }
