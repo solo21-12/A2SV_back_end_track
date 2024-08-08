@@ -13,13 +13,18 @@ func Run() {
 
 	taskService := services.NewTaskService(db)
 	taskController := controller.NewTaskController(taskService)
-	
+
+	userService := services.NewUserService(db)
+	userController := controller.NewUserController(userService)
+
 	router := gin.Default()
 	router.GET("/tasks", taskController.GetTasksController)
 	router.GET("/tasks/:id", taskController.GetTaskByIDController)
 	router.POST("/tasks", taskController.PostTaskController)
 	router.PUT("/tasks/:id", taskController.UpdateTaskController)
 	router.DELETE("/tasks/:id", taskController.DeleteTaskController)
+
+	router.POST("/register", userController.RegisterUser)
 
 	router.Run(":8081")
 }
