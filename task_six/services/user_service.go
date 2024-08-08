@@ -22,8 +22,10 @@ func NewUserService(db *mongo.Database) *UserService {
 
 func generatePassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hashedPassword), err
-
+	if err != nil {
+		return "", fmt.Errorf("error hashing password: %v", err)
+	}
+	return string(hashedPassword), nil
 }
 
 func (u *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
@@ -41,10 +43,8 @@ func (u *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	for cur.Next(ctx) {
 		var curElem model.User
 
-		err := cur.Decode(&curElem)
-
-		if err != nil {
-			return nil, fmt.Errorf("error: %v", err.Error())
+		if err := cur.Decode(&curElem); err != nil {
+			return nil, fmt.Errorf("error decoding user: %v", err)
 		}
 
 		users = append(users, curElem)
@@ -52,7 +52,7 @@ func (u *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	}
 
 	if err := cur.Err(); err != nil {
-		return nil, fmt.Errorf("error: %v", err.Error())
+		return nil, fmt.Errorf("cursor error: %v", err)
 
 	}
 
@@ -68,16 +68,21 @@ func (u *UserService) GetUser(ctx context.Context, email string) (model.User, er
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return model.User{}, fmt.Errorf("no user find with the given email address")
+			return model.User{}, fmt.Errorf("no user find with the given email address: %s", email)
 
 		}
-		return model.User{}, fmt.Errorf("error retriving a user")
+		return model.User{}, fmt.Errorf("error retriving a user: %v", err)
 	}
 
 	return curUser, nil
 }
 
 func (u *UserService) CreateUser(ctx context.Context, user model.User) (*mongo.InsertOneResult, error) {
+	_, err := u.GetUser(ctx, user.Email)
+
+	if err == nil {
+		return nil, fmt.Errorf("user with email %s already exists", user.Email)
+	}
 
 	users, err := u.GetAllUsers(ctx)
 

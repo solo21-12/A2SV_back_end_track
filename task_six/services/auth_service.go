@@ -12,34 +12,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func getJwtSecret() (string, error) {
+func getJwtSecret() ([]byte, error) {
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 
-	if jwtSecret == nil {
-		// this is a check to ensure that the JWT secret is set
-		return "", fmt.Errorf("JWT secret is not set")
+	if len(jwtSecret) == 0 {
+		return nil, fmt.Errorf("JWT secret is not set")
 	}
 
-	return string(jwtSecret), nil
+	return jwtSecret, nil
 }
 
-func valildatePassword(user model.User, password string) bool {
+func validatePassword(user model.User, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) == nil
-
 }
 
 func GenerateToken(user model.User) (string, error) {
-	// this function generates a JWT token for the user
-
 	jwtSecret, err := getJwtSecret()
-
-	if err == nil {
-		// this is a check to ensure that the JWT secret is set
+	if err != nil {
 		return "", err
 	}
 
-	// this creates a new JWT token with the user's ID, email and role
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,
 		"role":    user.Role,
@@ -48,65 +41,51 @@ func GenerateToken(user model.User) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
-func ValidateToken(tokenStr string, jwtSecret string) (*jwt.Token, error) {
-	// this function validates the JWT token
-
+func ValidateToken(tokenStr string, jwtSecret []byte) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
 		return jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-
+		return nil, fmt.Errorf("invalid token: %v", err)
 	}
 
 	return token, nil
 }
 
 func ValidateAuthHeader(authHeader string) ([]string, error) {
-	// this function validates the authorization header
 	if authHeader == "" {
-		return []string{}, fmt.Errorf("authorization header is required")
+		return nil, fmt.Errorf("authorization header is required")
 	}
 
 	authParts := strings.Split(authHeader, " ")
-	if len(authParts) != 2 || authParts[0] != "bearer" {
-		return []string{}, fmt.Errorf("invalid authorization header")
+	if len(authParts) != 2 || strings.ToLower(authParts[0]) != "bearer" {
+		return nil, fmt.Errorf("invalid authorization header")
 	}
 
 	return authParts, nil
 }
 
 func GetClaims(authHeader string) (jwt.MapClaims, error) {
-	// this function gets the claims from the JWT token
-	jwtSecret, jErr := getJwtSecret()
-
-	if jErr == nil {
-		// this is a check to ensure that the JWT secret is set
-		return nil, jErr
+	jwtSecret, err := getJwtSecret()
+	if err != nil {
+		return nil, err
 	}
 
 	authParts, err := ValidateAuthHeader(authHeader)
-
 	if err != nil {
 		return nil, err
 	}
 
 	token, err := ValidateToken(authParts[1], jwtSecret)
-
-	// this checks if the token is valid
-	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-
+	if err != nil {
+		return nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-
-	// this checks if the claims are valid
 	if !ok {
 		return nil, fmt.Errorf("invalid JWT claims")
 	}
@@ -115,27 +94,24 @@ func GetClaims(authHeader string) (jwt.MapClaims, error) {
 }
 
 func LoginUser(user model.UserLogin, db *mongo.Database, ctx context.Context) (model.Auth, error) {
-
 	userService := NewUserService(db)
 
 	curUser, err := userService.GetUser(ctx, user.Email)
-
 	if err != nil {
 		return model.Auth{}, err
 	}
 
-	if !valildatePassword(curUser, user.Password) {
-		return model.Auth{}, fmt.Errorf("invalid email and password")
+	if !validatePassword(curUser, user.Password) {
+		return model.Auth{}, fmt.Errorf("invalid email or password")
 	}
 
 	token, err := GenerateToken(curUser)
-
 	if err != nil {
-		return model.Auth{}, fmt.Errorf("internal server error")
+		return model.Auth{}, fmt.Errorf("internal server error: %v", err)
 	}
 
 	return model.Auth{
 		User:  user,
-		Token: token}, nil
-
+		Token: token,
+	}, nil
 }
