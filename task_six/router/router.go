@@ -3,6 +3,7 @@ package router
 import (
 	"example.com/task_manager_api/controllers"
 	"example.com/task_manager_api/data"
+	"example.com/task_manager_api/middleware"
 	"example.com/task_manager_api/services"
 
 	"github.com/gin-gonic/gin"
@@ -18,11 +19,21 @@ func Run() {
 	userController := controller.NewUserController(userService)
 
 	router := gin.Default()
-	router.GET("/tasks", taskController.GetTasksController)
-	router.GET("/tasks/:id", taskController.GetTaskByIDController)
-	router.POST("/tasks", taskController.PostTaskController)
-	router.PUT("/tasks/:id", taskController.UpdateTaskController)
-	router.DELETE("/tasks/:id", taskController.DeleteTaskController)
+
+	protected := router.Group("/")
+	protected.Use(middleware.AuthMiddleware())
+	{
+		protected.GET("/tasks", taskController.GetTasksController)
+		protected.GET("/tasks/:id", taskController.GetTaskByIDController)
+
+		adminGroup := protected.Group("/")
+		adminGroup.Use(middleware.RoleBasedMiddleWare("admin"))
+
+		adminGroup.POST("/tasks", taskController.PostTaskController)
+		adminGroup.PUT("/tasks/:id", taskController.UpdateTaskController)
+		adminGroup.DELETE("/tasks/:id", taskController.DeleteTaskController)
+
+	}
 
 	router.POST("/register", userController.RegisterUser)
 	router.POST("/login", userController.LoginUser)
