@@ -6,6 +6,7 @@ import (
 
 	"example.com/task_manager_api/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -112,4 +113,20 @@ func (u *UserService) CreateUser(ctx context.Context, user model.User) (*mongo.I
 
 	return insertRes, nil
 
+}
+
+func (u *UserService) GetUserID(ctx context.Context, id primitive.ObjectID) (model.User, error) {
+	filter := bson.D{{Key: "_id", Value: id}}
+	var user model.User
+	err := u.collection.FindOne(ctx, filter).Decode(&user)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.User{}, fmt.Errorf("no user found with the give id %v", id)
+		}
+
+		return model.User{}, err
+	}
+
+	return user, nil
 }
