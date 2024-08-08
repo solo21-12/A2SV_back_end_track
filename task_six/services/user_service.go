@@ -57,7 +57,6 @@ func (u *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	}
 
 	return users, nil
-
 }
 
 func (u *UserService) GetUser(ctx context.Context, email string) (model.User, error) {

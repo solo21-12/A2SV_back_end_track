@@ -1,12 +1,15 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
 	"example.com/task_manager_api/model"
-	"github.com/dgrijalva/jwt-go"
+                                                                                                     	"github.com/dgrijalva/jwt-go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func getJwtSecret() (string, error) {
@@ -18,6 +21,14 @@ func getJwtSecret() (string, error) {
 	}
 
 	return string(jwtSecret), nil
+}
+
+func valildatePassword(user model.User, password string) bool {
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+		return false
+	}
+
+	return true
 }
 
 func GenerateToken(user model.User) (string, error) {
@@ -38,7 +49,6 @@ func GenerateToken(user model.User) (string, error) {
 	})
 
 	return token.SignedString(jwtSecret)
-
 }
 
 func ValidateToken(tokenStr string, jwtSecret string) (*jwt.Token, error) {
@@ -105,4 +115,30 @@ func GetClaims(authHeader string) (jwt.MapClaims, error) {
 	}
 
 	return claims, nil
+}
+
+func LoginUser(user model.UserLogin, db *mongo.Database, ctx context.Context) (model.Auth, error) {
+
+	userService := NewUserService(db)
+
+	curUser, err := userService.GetUser(ctx, user.Email)
+
+	if err != nil {
+		return model.Auth{}, err
+	}
+
+	if !valildatePassword(curUser, user.Password) {
+		return model.Auth{}, fmt.Errorf("invalid email and password")
+	}
+
+	token, err := GenerateToken(curUser)
+
+	if err != nil {
+		return model.Auth{}, fmt.Errorf("internal server error")
+	}
+
+	return model.Auth{
+		User:  user,
+		Token: token,}, nil
+
 }
