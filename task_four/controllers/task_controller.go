@@ -47,7 +47,9 @@ func PostTaskController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.IndentedJSON(http.StatusCreated, newTask)
+	ctx.IndentedJSON(http.StatusCreated, gin.H{
+		"created task": newTask,
+	})
 }
 
 func DeleteTaskController(ctx *gin.Context) {
