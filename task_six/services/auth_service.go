@@ -74,7 +74,7 @@ func ValidateAuthHeader(authHeader string) ([]string, error) {
 	return authParts, nil
 }
 
-func GetClaims(authHeader string) (jwt.Claims, error) {
+func GetClaims(authHeader string) (jwt.MapClaims, error) {
 	// this function gets the claims from the JWT token
 	jwtSecret, jErr := getJwtSecret()
 
