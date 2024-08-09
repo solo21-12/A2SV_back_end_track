@@ -8,14 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"example.com/task_manager_api/model"
-	"example.com/task_manager_api/services"
+	"example.com/task_manager_api/data"
 )
 
 type TaskController struct {
-	service *services.TaskService
+	service *data.TaskService
 }
 
-func NewTaskController(service *services.TaskService) *TaskController {
+func NewTaskController(service *data.TaskService) *TaskController {
 	return &TaskController{
 		service: service,
 	}

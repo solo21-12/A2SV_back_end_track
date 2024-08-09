@@ -3,7 +3,6 @@ package router
 import (
 	"example.com/task_manager_api/controllers"
 	"example.com/task_manager_api/data"
-	"example.com/task_manager_api/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,7 +10,7 @@ import (
 func Run() {
 	db := data.ConnectMongo()
 
-	taskService := services.NewTaskService(db)
+	taskService := data.NewTaskService(db)
 	taskController := controller.NewTaskController(taskService)
 	router := gin.Default()
 	router.GET("/tasks", taskController.GetTasksController)
