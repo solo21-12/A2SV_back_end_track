@@ -4,7 +4,6 @@ import (
 	"example.com/task_manager_api/controllers"
 	"example.com/task_manager_api/data"
 	"example.com/task_manager_api/middleware"
-	"example.com/task_manager_api/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,10 +11,10 @@ import (
 func Run() {
 	db := data.ConnectMongo()
 
-	taskService := services.NewTaskService(db)
+	taskService := data.NewTaskService(db)
 	taskController := controller.NewTaskController(taskService)
 
-	userService := services.NewUserService(db)
+	userService := data.NewUserService(db)
 	userController := controller.NewUserController(userService)
 
 	router := gin.Default()
@@ -32,7 +31,7 @@ func Run() {
 		adminGroup.POST("/tasks", taskController.PostTaskController)
 		adminGroup.PUT("/tasks/:id", taskController.UpdateTaskController)
 		adminGroup.DELETE("/tasks/:id", taskController.DeleteTaskController)
-		adminGroup.PATCH("/promote", userController.PromoteUser)
+		adminGroup.PATCH("/promote/:id", userController.PromoteUser)
 	}
 
 	router.POST("/register", userController.RegisterUser)

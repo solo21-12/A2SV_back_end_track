@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"example.com/task_manager_api/services"
+	"example.com/task_manager_api/data"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	// this middleware checks if the user is authenticated
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
-		_, err := services.GetClaims(authHeader)
+		_, err := data.GetClaims(authHeader)
 
 		if err != nil {
 			ctx.JSON(401, gin.H{"error": "Unauthorized"})
@@ -33,7 +33,7 @@ func RoleBasedMiddleWare(roles ...string) gin.HandlerFunc {
 	// this middleware checks if the user is authorized to perform an action
 	return func(ctx *gin.Context) {
 
-		claims, err := services.GetClaims(ctx.GetHeader("Authorization"))
+		claims, err := data.GetClaims(ctx.GetHeader("Authorization"))
 
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})

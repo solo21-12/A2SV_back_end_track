@@ -4,17 +4,17 @@ import (
 	"context"
 	"net/http"
 
+	"example.com/task_manager_api/data"
 	"example.com/task_manager_api/model"
-	"example.com/task_manager_api/services"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserController struct {
-	service *services.UserService
+	service *data.UserService
 }
 
-func NewUserController(service *services.UserService) *UserController {
+func NewUserController(service *data.UserService) *UserController {
 	return &UserController{
 		service: service,
 	}
@@ -68,7 +68,7 @@ func (u *UserController) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	res, err := services.LoginUser(user, *u.service, ctx)
+	res, err := data.LoginUser(user, *u.service, ctx)
 
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -101,5 +101,4 @@ func (u *UserController) PromoteUser(ctx *gin.Context) {
 	}
 
 	ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": "something went wrong"})
-
 }
