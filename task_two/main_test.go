@@ -18,7 +18,7 @@ func TestWordFrequencyCount(t *testing.T) {
 func TestCheckPalindrome(t *testing.T) {
 	palindromeWord := "abccba"
 	notPalindromeWord := "abcab"
-	assert.Equal(t, checkPalindrome(palindromeWord), true)
-	assert.Equal(t, checkPalindrome(notPalindromeWord), false)
+	assert.Equal(t, CheckPalindrome(palindromeWord), true)
+	assert.Equal(t, CheckPalindrome(notPalindromeWord), false)
 
 }
