@@ -77,3 +77,29 @@ func (u *UserController) LoginUser(ctx *gin.Context) {
 
 	ctx.IndentedJSON(http.StatusOK, res)
 }
+
+func (u *UserController) PromoteUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	updatedRes, err := u.service.PromoteUser(ctx, objectId)
+
+	if err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if updatedRes.ModifiedCount > 0 && updatedRes.MatchedCount > 0 {
+		ctx.IndentedJSON(http.StatusOK, gin.H{"message": "user successfuly promoted to admin"})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": "something went wrong"})
+
+}
