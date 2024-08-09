@@ -19,3 +19,4 @@ type UserRegister struct {
 	Email string             `json:"email" binding:"required"`
 	Role  string             `json:"role"`
 }
+

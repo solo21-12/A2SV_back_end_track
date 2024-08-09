@@ -130,3 +130,30 @@ func (u *UserService) GetUserID(ctx context.Context, id primitive.ObjectID) (mod
 
 	return user, nil
 }
+
+func (u *UserService) PromoteUser(ctx context.Context, id primitive.ObjectID) (*mongo.UpdateResult, error) {
+	user, err := u.GetUserID(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{
+		Key: "_id", Value: user.ID,
+	}}
+	update := bson.D{{
+		Key: "$set", Value: bson.D{
+			{
+				Key: "role", Value: "admin",
+			},
+		},
+	}}
+
+	updateResult, err := u.collection.UpdateOne(ctx, filter, update)
+
+	if err != nil {
+		return nil, fmt.Errorf("error occured during updating the user  with email %v to admin", user.Email)
+	}
+
+	return updateResult, nil
+}

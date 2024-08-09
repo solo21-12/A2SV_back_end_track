@@ -32,7 +32,7 @@ func Run() {
 		adminGroup.POST("/tasks", taskController.PostTaskController)
 		adminGroup.PUT("/tasks/:id", taskController.UpdateTaskController)
 		adminGroup.DELETE("/tasks/:id", taskController.DeleteTaskController)
-
+		adminGroup.PATCH("/promote", userController.PromoteUser)
 	}
 
 	router.POST("/register", userController.RegisterUser)
