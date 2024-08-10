@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
@@ -17,10 +18,16 @@ type Env struct {
 func NewEnv() *Env {
 	// This is to load the env file
 	env := Env{}
+	projectRoot, err := filepath.Abs(filepath.Join(".."))
 
-	viper.SetConfigFile(".env")
+	if err != nil {
+		log.Fatalf("Error getting project root path: %v", err)
+	}
 
-	err := viper.ReadInConfig()
+	// Set the path to the .env file
+	viper.SetConfigFile(filepath.Join(projectRoot, ".env"))
+
+	err = viper.ReadInConfig()
 
 	if err != nil {
 		log.Fatalf("Can't find the file .env: %v", err)
