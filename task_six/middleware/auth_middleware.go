@@ -35,6 +35,12 @@ func RoleBasedMiddleWare(roles ...string) gin.HandlerFunc {
 
 		claims, err := data.GetClaims(ctx.GetHeader("Authorization"))
 
+		if !data.CheckExpTime(claims) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			ctx.Abort()
+			return
+		}
+
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			ctx.Abort()

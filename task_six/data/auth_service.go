@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"example.com/task_manager_api/model"
 	"github.com/dgrijalva/jwt-go"
@@ -25,8 +26,19 @@ func validatePassword(user model.User, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) == nil
 }
 
+func CheckExpTime(claim jwt.MapClaims) bool {
+
+	expTimeStamp := int64(claim["exp"].(float64))
+
+	exTime := time.Unix(expTimeStamp, 0)
+
+	return !time.Now().After(exTime)
+
+}
+
 func GenerateToken(user model.User) (string, error) {
 	jwtSecret, err := getJwtSecret()
+	expTime := time.Now().Add(30 * time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -35,6 +47,7 @@ func GenerateToken(user model.User) (string, error) {
 		"user_id": user.ID,
 		"email":   user.Email,
 		"role":    user.Role,
+		"exp":     expTime,
 	})
 
 	return token.SignedString(jwtSecret)
