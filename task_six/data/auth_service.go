@@ -27,13 +27,31 @@ func validatePassword(user model.User, password string) bool {
 }
 
 func CheckExpTime(claim jwt.MapClaims) bool {
+	expValue, ok := claim["exp"]
+	if !ok {
+		fmt.Println("Error: 'exp' claim is missing or has an unexpected type")
+		return false
+	}
 
-	expTimeStamp := int64(claim["exp"].(float64))
+	var expTime time.Time
+	switch v := expValue.(type) {
+	case float64:
+		expTime = time.Unix(int64(v), 0)
+	case string:
+		var err error
+		expTime, err = time.Parse(time.RFC3339, v)
+		if err != nil {
+			fmt.Println("Error parsing 'exp' claim as time.Time:", err)
+			return false
+		}
+	default:
+		fmt.Println("Error: 'exp' claim has an unexpected type")
+		return false
+	}
 
-	exTime := time.Unix(expTimeStamp, 0)
+	currentTime := time.Now()
 
-	return !time.Now().After(exTime)
-
+	return !currentTime.After(expTime)
 }
 
 func GenerateToken(user model.User) (string, error) {

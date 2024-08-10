@@ -4,17 +4,16 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var validate *validator.Validate
 
 type Task struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Title       string             `json:"title" binding:"required"`
-	Description string             `json:"description"`
-	DueDate     time.Time          `json:"due_date"`
-	Status      string             `json:"status" binding:"required"`
+	ID          string    `bson:"_id,omitempty" json:"id"`
+	Title       string    `json:"title" binding:"required"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Status      string    `json:"status" binding:"required"`
 }
 
 func init() {

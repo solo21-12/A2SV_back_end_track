@@ -105,24 +105,29 @@ func (t *TaskController) UpdateTaskController(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.BindJSON(&updatedTask); err != nil {
+	if err := ctx.ShouldBind(&updatedTask); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
 
-	updatedResult, err := t.service.UpdateTask(objectID, updatedTask, context.TODO())
+	// Use the request context
+	updatedResult, err := t.service.UpdateTask(objectID, updatedTask, ctx)
 
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	updatedTask.ID = objectID
+	// Log the update result
+
 	if updatedResult.MatchedCount > 0 && updatedResult.ModifiedCount > 0 {
+		updatedTask.ID = id
 		ctx.IndentedJSON(http.StatusOK, updatedTask)
-		return
+	} else if updatedResult.MatchedCount > 0 && updatedResult.ModifiedCount == 0 {
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"message": "No update has been made to the file"})
 
+	} else {
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found or not updated"})
 	}
-	ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "something went wrong"})
-
 }
+
