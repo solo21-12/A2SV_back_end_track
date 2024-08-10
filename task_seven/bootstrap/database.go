@@ -17,10 +17,8 @@ func NewMongoDatabase(env *Env) *mongo.Client {
 
 	dbUser := env.MONGO_USER
 	dbPassword := env.MONGO_PASSWORD
-	dbName := env.MONGO_DATABASE
 
-	dbURL := fmt.Sprintf("mongodb+srv://%s:%s@mongodb-university.fs4tab8.mongodb.net/%s?retryWrites=true&w=majority&appName=mongodb-university", dbUser, dbPassword, dbName)
-
+	dbURL := fmt.Sprintf("mongodb+srv://%s:%s@mongodb-university.fs4tab8.mongodb.net/?retryWrites=true&w=majority&appName=mongodb-university", dbUser, dbPassword)
 	clientOptions := options.Client().ApplyURI(dbURL)
 
 	client, err := mongo.Connect(ctx, clientOptions)

@@ -11,6 +11,7 @@ type Env struct {
 	MONGO_USER     string `mapstructure:"MONGO_USER"`
 	MONGO_PASSWORD string `mapstructure:"MONGO_PASSWORD"`
 	MONGO_DATABASE string `mapstructure:"MONGO_DATABASE"`
+	SERVER_ADDRESS string `mapstructure:"SERVER_ADDRESS"`
 }
 
 func NewEnv() *Env {
