@@ -103,17 +103,14 @@ func (task *TaskService) DeleteTask(taskID string, ctx context.Context) (*mongo.
 }
 
 func (task *TaskService) UpdateTask(taskID primitive.ObjectID, updatedTask model.Task, ctx context.Context) (*mongo.UpdateResult, error) {
-	// Create the filter to find the document to update
 	filter := bson.D{{Key: "_id", Value: taskID}}
 
-	// Define the update operation using $set to update only the specified fields
 	update := bson.D{{Key: "$set", Value: bson.M{
 		"title":       updatedTask.Title,
 		"description": updatedTask.Description,
-		// Add other fields you want to update
+		"status":      updatedTask.Status,
 	}}}
 
-	// Perform the update operation
 	updatedResult, err := task.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, fmt.Errorf("error updating task: %v", err)
