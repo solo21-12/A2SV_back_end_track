@@ -41,14 +41,14 @@ func PostTaskController(ctx *gin.Context) {
 		return
 	}
 
-	err := services.CreateTask(newTask)
+	err, createdTask := services.CreateTask(newTask)
 	if err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.IndentedJSON(http.StatusCreated, gin.H{
-		"created task": newTask,
+		"created task": createdTask,
 	})
 }
 

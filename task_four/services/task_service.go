@@ -7,6 +7,7 @@ import (
 	"example.com/task_manager_api/model"
 )
 
+
 func GetTasks() []model.Task {
 	return data.Tasks
 }
@@ -21,19 +22,15 @@ func GetTaskByID(taskID string) (model.Task, error) {
 	return model.Task{}, fmt.Errorf("task with the given id not found")
 }
 
-func CreateTask(newTask model.Task) error {
-	_, err := GetTaskByID(newTask.ID)
-
-	// Task exists
-	if err == nil {
-		return fmt.Errorf("the task already exists")
-	}
-
+func CreateTask(newTask model.Task) (error, model.Task) {
+	// Generate a new ID based on the current length of tasks
+	newTask.ID = fmt.Sprintf("%d", len(data.Tasks)+1)
 	// Add new task
 	data.Tasks = append(data.Tasks, newTask)
 
-	return nil
+	return nil, newTask
 }
+
 
 func DeleteTask(taskID string) error {
 	for i, task := range data.Tasks {

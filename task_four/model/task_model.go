@@ -8,7 +8,7 @@ import (
 var validate *validator.Validate
 
 type Task struct {
-	ID          string    `json:"id" binding:"required"`
+	ID          string    `json:"id""`
 	Title       string    `json:"title" binding:"required"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"due_date"`
