@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -31,7 +32,6 @@ func CreateAccessToken(user domain.UserDTO, secret []byte) (accessToken string, 
 
 }
 
-
 func GetJwtSecret() ([]byte, error) {
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 
@@ -41,3 +41,62 @@ func GetJwtSecret() ([]byte, error) {
 
 	return jwtSecret, nil
 }
+
+func ValidateToken(tokenStr string, jwtSecret []byte) (*domain.JWTCustome, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &domain.JWTCustome{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, fmt.Errorf("invalid token: %v", err)
+	}
+
+	claims, ok := token.Claims.(*domain.JWTCustome)
+	if !ok {
+		return nil, fmt.Errorf("invalid JWT claims")
+	}
+
+	return claims, nil
+}
+
+
+
+func ValidateAuthHeader(authHeader string) ([]string, error) {
+	if authHeader == "" {
+		return nil, fmt.Errorf("authorization header is required")
+	}
+
+	authParts := strings.Split(authHeader, " ")
+	if len(authParts) != 2 || strings.ToLower(authParts[0]) != "bearer" {
+		return nil, fmt.Errorf("invalid authorization header")
+	}
+
+	return authParts, nil
+}
+
+func GetClaims(authHeader string) (*domain.JWTCustome, error) {
+	// Retrieve the JWT secret key
+	jwtSecret, err := GetJwtSecret()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get JWT secret: %v", err)
+	}
+
+	// Validate and parse the Authorization header
+	authParts, err := ValidateAuthHeader(authHeader)
+	if err != nil {
+		return nil, fmt.Errorf("invalid authorization header: %v", err)
+	}
+
+	// Validate the JWT token
+	claims, err := ValidateToken(authParts[1], jwtSecret)
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %v", err)
+	}
+
+	return claims, nil
+}
+
+
