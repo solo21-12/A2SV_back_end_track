@@ -17,7 +17,7 @@ type SignupController struct {
 func (s SignupController) SignUp(ctx *gin.Context) {
 	var user domain.UserCreateRequest
 
-	secret := s.Env.JWT_SECRET
+	secret, _ := infrastructure.GetJwtSecret()
 
 	if err := ctx.ShouldBind(&user); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid data format"})
@@ -43,7 +43,7 @@ func (s SignupController) SignUp(ctx *gin.Context) {
 	token, tErr := infrastructure.CreateAccessToken(newUser, secret)
 
 	if tErr != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error generating the token"})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error generating the token" + tErr.Error()})
 		return
 	}
 
