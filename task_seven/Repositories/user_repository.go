@@ -41,7 +41,6 @@ func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *do
 		return nil, domain.InternalServerError("Error decoding users: " + err.Error())
 	}
 
-	// Return the list of users (can be empty) and no error
 	return users, nil
 }
 

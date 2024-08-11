@@ -12,7 +12,7 @@ import (
 
 func NewMongoDatabase(env *Env) *mongo.Client {
 	// creating the context
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	dbUser := env.MONGO_USER
