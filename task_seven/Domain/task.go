@@ -23,9 +23,9 @@ type TaskCreateDTO struct {
 }
 
 type TaskRepository interface {
-	GetTasks(ctx context.Context) ([]TaskDTO, error)
-	GetTaskByID(taskID string, ctx context.Context) (TaskDTO, error)
-	CreateTask(newTask TaskCreateDTO, ctx context.Context) (TaskDTO, error)
-	DeleteTask(taskID string, ctx context.Context) error
-	UpdateTask(taskID primitive.ObjectID, updatedTask TaskCreateDTO, ctx context.Context) error
+	GetTasks(ctx context.Context) ([]TaskDTO, *ErrorResponse)
+	GetTaskByID(taskID primitive.ObjectID, ctx context.Context) (TaskDTO, *ErrorResponse)
+	CreateTask(newTask TaskCreateDTO, ctx context.Context) (TaskDTO, *ErrorResponse)
+	DeleteTask(taskID primitive.ObjectID, ctx context.Context) *ErrorResponse
+	UpdateTask(taskID primitive.ObjectID, updatedTask TaskCreateDTO, ctx context.Context) *ErrorResponse
 }
