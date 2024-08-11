@@ -34,9 +34,9 @@ type LoginResponse struct {
 }
 
 type UserRepository interface {
-	GetAllUsers(ctx context.Context) ([]UserDTO, error)
-	GetUser(ctx context.Context, email string) (UserDTO, error)
-	CreateUser(ctx context.Context, user UserCreateRequest) (UserDTO, error)
-	GetUserID(ctx context.Context, id primitive.ObjectID) (UserDTO, error)
-	PromoteUser(ctx context.Context, id primitive.ObjectID) error
+	GetAllUsers(ctx context.Context) ([]UserDTO, *ErrorResponse)
+	GetUser(ctx context.Context, email string) (UserDTO, *ErrorResponse)
+	CreateUser(ctx context.Context, user UserCreateRequest) (UserDTO, *ErrorResponse)
+	GetUserID(ctx context.Context, id primitive.ObjectID) (UserDTO, *ErrorResponse)
+	PromoteUser(ctx context.Context, id primitive.ObjectID) *ErrorResponse
 }

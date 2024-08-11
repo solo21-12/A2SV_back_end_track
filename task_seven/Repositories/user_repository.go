@@ -1,3 +1,137 @@
 package repositories
 
+import (
+	"context"
 
+	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type userRepository struct {
+	db         *mongo.Database
+	collection string
+}
+
+func NewUserRepository(db *mongo.Database, collection string) domain.UserRepository {
+	return &userRepository{
+		db:         db,
+		collection: collection,
+	}
+}
+
+func (u *userRepository) GetCollection() *mongo.Collection {
+	return u.db.Collection(u.collection)
+}
+
+func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *domain.ErrorResponse) {
+	collection := u.GetCollection()
+	opt := options.Find().SetProjection(bson.D{{Key: "password", Value: 0}})
+
+	cur, err := collection.Find(ctx, bson.D{}, opt)
+	if err != nil {
+		return nil, domain.InternalServerError("Internal server error")
+	}
+
+	var users []domain.UserDTO
+
+	if err := cur.All(ctx, &users); err != nil {
+		return nil, domain.InternalServerError("Error decoding users: " + err.Error())
+	}
+
+	// Return the list of users (can be empty) and no error
+	return users, nil
+}
+
+func (u *userRepository) GetUser(ctx context.Context, email string) (domain.UserDTO, *domain.ErrorResponse) {
+	opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
+	collection := u.GetCollection()
+
+	filter := bson.D{{Key: "email", Value: email}}
+	var user domain.UserDTO
+
+	err := collection.FindOne(ctx, filter, opts).Decode(&user)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return domain.UserDTO{}, domain.NotFound("User with the given email not found")
+		}
+
+		return domain.UserDTO{}, domain.InternalServerError("Error fetching user: " + err.Error())
+	}
+
+	return user, nil
+}
+func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateRequest) (domain.UserDTO, *domain.ErrorResponse) {
+	collection := u.GetCollection()
+	_, err := u.GetUser(ctx, user.Email)
+
+	if err == nil {
+		return domain.UserDTO{}, domain.BadRequest("User already exists")
+	}
+
+	inserRes, nErr := collection.InsertOne(ctx, user)
+
+	if nErr != nil {
+		return domain.UserDTO{}, domain.InternalServerError("Something went wrong")
+	}
+
+	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
+
+	if !ok {
+		return domain.UserDTO{}, domain.InternalServerError("Error while converting the id")
+	}
+
+	newUser, eErr := u.GetUserID(ctx, objectID)
+
+	if eErr != nil {
+		return domain.UserDTO{}, domain.InternalServerError("Error fetching newly created user")
+	}
+
+	return newUser, nil
+}
+func (u *userRepository) GetUserID(ctx context.Context, id primitive.ObjectID) (domain.UserDTO, *domain.ErrorResponse) {
+	var user domain.UserDTO
+	collection := u.GetCollection()
+
+	filter := bson.D{{Key: "_id", Value: id}}
+	opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
+
+	err := collection.FindOne(ctx, filter, opts).Decode(&user)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return domain.UserDTO{}, domain.NotFound("User with the given ID not found")
+		}
+
+		return domain.UserDTO{}, domain.InternalServerError("Error fetching user: " + err.Error())
+	}
+
+	return user, nil
+}
+func (u *userRepository) PromoteUser(ctx context.Context, id primitive.ObjectID) *domain.ErrorResponse {
+	collection := u.GetCollection()
+	user, err := u.GetUserID(ctx, id)
+
+	if err != nil {
+		return domain.NotFound("User Not found")
+	}
+
+	filter := bson.D{{Key: "_id", Value: user.ID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{
+		Key: "role", Value: "admin",
+	}}}}
+
+	updateRes, nErr := collection.UpdateOne(ctx, filter, update)
+
+	if nErr != nil {
+		return domain.InternalServerError("Error updating user: " + nErr.Error())
+	}
+
+	if updateRes.MatchedCount > 0 && updateRes.ModifiedCount == 0 {
+		return domain.BadRequest("User already is an admin")
+	}
+	return nil
+}

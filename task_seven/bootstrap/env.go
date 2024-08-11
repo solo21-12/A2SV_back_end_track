@@ -8,11 +8,12 @@ import (
 )
 
 type Env struct {
-	JWT_SECRET     string `mapstructure:"JWT_SECRET"`
-	MONGO_USER     string `mapstructure:"MONGO_USER"`
-	MONGO_PASSWORD string `mapstructure:"MONGO_PASSWORD"`
-	MONGO_DATABASE string `mapstructure:"MONGO_DATABASE"`
-	SERVER_ADDRESS string `mapstructure:"SERVER_ADDRESS"`
+	JWT_SECRET      string `mapstructure:"JWT_SECRET"`
+	MONGO_USER      string `mapstructure:"MONGO_USER"`
+	MONGO_PASSWORD  string `mapstructure:"MONGO_PASSWORD"`
+	MONGO_DATABASE  string `mapstructure:"MONGO_DATABASE"`
+	SERVER_ADDRESS  string `mapstructure:"SERVER_ADDRESS"`
+	USER_COLLECTION string `mapstructure:"USER_COLLECTION"`
 }
 
 func NewEnv() *Env {
