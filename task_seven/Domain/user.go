@@ -28,14 +28,11 @@ type UserDTO struct {
 }
 
 // LoginResponse represents the response structure after a successful login.
-type LoginResponse struct {
-	User  UserDTO `json:"user"`
-	Token string  `json:"token"`
-}
+
 
 type UserRepository interface {
 	GetAllUsers(ctx context.Context) ([]UserDTO, *ErrorResponse)
-	GetUser(ctx context.Context, email string) (UserDTO, *ErrorResponse)
+	GetUserEmail(ctx context.Context, email string) (User, *ErrorResponse)
 	CreateUser(ctx context.Context, user UserCreateRequest) (UserDTO, *ErrorResponse)
 	GetUserID(ctx context.Context, id primitive.ObjectID) (UserDTO, *ErrorResponse)
 	PromoteUser(ctx context.Context, id primitive.ObjectID) *ErrorResponse

@@ -44,28 +44,28 @@ func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *do
 	return users, nil
 }
 
-func (u *userRepository) GetUser(ctx context.Context, email string) (domain.UserDTO, *domain.ErrorResponse) {
-	opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
+func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain.User, *domain.ErrorResponse) {
+	// opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
 	collection := u.GetCollection()
 
 	filter := bson.D{{Key: "email", Value: email}}
-	var user domain.UserDTO
+	var user domain.User
 
-	err := collection.FindOne(ctx, filter, opts).Decode(&user)
+	err := collection.FindOne(ctx, filter).Decode(&user)
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return domain.UserDTO{}, domain.NotFound("User with the given email not found")
+			return domain.User{}, domain.NotFound("User with the given email not found")
 		}
 
-		return domain.UserDTO{}, domain.InternalServerError("Error fetching user: " + err.Error())
+		return domain.User{}, domain.InternalServerError("Error fetching user: " + err.Error())
 	}
 
 	return user, nil
 }
 func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateRequest) (domain.UserDTO, *domain.ErrorResponse) {
 	collection := u.GetCollection()
-	_, err := u.GetUser(ctx, user.Email)
+	_, err := u.GetUserEmail(ctx, user.Email)
 
 	if err == nil {
 		return domain.UserDTO{}, domain.BadRequest("User already exists")

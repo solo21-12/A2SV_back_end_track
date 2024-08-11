@@ -10,5 +10,6 @@ func Setup(env *bootstrap.Env, db *mongo.Database, gin *gin.Engine) {
 
 	publicRouter := gin.Group("")
 	NewSignupRouter(env, db, publicRouter)
+	NewLoginRouter(env, db, publicRouter)
 
 }

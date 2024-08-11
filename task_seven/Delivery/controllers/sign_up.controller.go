@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
-	infrastructure "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Infrastructure"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
 )
 
@@ -17,14 +16,14 @@ type SignupController struct {
 func (s SignupController) SignUp(ctx *gin.Context) {
 	var user domain.UserCreateRequest
 
-	secret, _ := infrastructure.GetJwtSecret()
+	secret, _ := s.SignupUsecase.GetJwtSecret()
 
 	if err := ctx.ShouldBind(&user); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid data format"})
 		return
 	}
 
-	encryptedPassword, paErr := infrastructure.EncryptPassword(user.Password)
+	encryptedPassword, paErr := s.SignupUsecase.EncryptPassword(user.Password)
 
 	if paErr != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error encrypting the password"})
@@ -40,7 +39,7 @@ func (s SignupController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	token, tErr := infrastructure.CreateAccessToken(newUser, secret)
+	token, tErr := s.SignupUsecase.CreateAccessToken(newUser, secret)
 
 	if tErr != nil {
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error generating the token" + tErr.Error()})

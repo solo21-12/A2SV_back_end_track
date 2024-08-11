@@ -16,5 +16,8 @@ type SignUpResponse struct {
 
 type SignUpUseCase interface {
 	CreateUser(ctx context.Context, user UserCreateRequest) (UserDTO, *ErrorResponse)
-	
+	CreateAccessToken(user UserDTO, secret []byte) (accessToken string, err error)
+	EncryptPassword(password string) (string, error)
+	GetJwtSecret() ([]byte, error)
+
 }
