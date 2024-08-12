@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		_, err := GetClaims(authHeader)
 
 		if err != nil {
-			ctx.JSON(401, gin.H{"error": "Unauthorized" + err.Error()})
+			ctx.JSON(401, gin.H{"error": "Unauthorized"})
 			ctx.Abort()
 			return
 		}
@@ -49,8 +48,6 @@ func RoleBasedMiddleWare(roles ...string) gin.HandlerFunc {
 		switch method {
 		case POST, DELETE, PUT, PATCH:
 			authrized := false
-
-			log.Println(userRole, "user role")
 
 			for _, role := range roles {
 				if role == userRole {

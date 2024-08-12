@@ -21,14 +21,18 @@ func (t *taskUseCase) GetTasks(ctx context.Context) ([]domain.TaskDTO, *domain.E
 	return t.taskRepository.GetTasks(ctx)
 }
 func (t *taskUseCase) GetTaskByID(taskID primitive.ObjectID, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
+	return t.taskRepository.GetTaskByID(taskID, ctx)
 
 }
 func (t *taskUseCase) CreateTask(newTask domain.TaskCreateDTO, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
+	return t.taskRepository.CreateTask(newTask, ctx)
 
 }
 func (t *taskUseCase) DeleteTask(taskID primitive.ObjectID, ctx context.Context) *domain.ErrorResponse {
+	return t.taskRepository.DeleteTask(taskID, ctx)
 
 }
 func (t *taskUseCase) UpdateTask(taskID primitive.ObjectID, updatedTask domain.TaskCreateDTO, ctx context.Context) *domain.ErrorResponse {
+	return t.taskRepository.UpdateTask(taskID, updatedTask, ctx)
 
 }

@@ -20,4 +20,5 @@ func Setup(env *bootstrap.Env, db *mongo.Database, gin *gin.Engine) {
 	adminGroup.Use(infrastructure.RoleBasedMiddleWare(env.ALLOWED_USERS))
 
 	NewPromoteRouter(env, db, adminGroup)
+	NewTaskRouter(env, db, adminGroup)
 }

@@ -19,5 +19,4 @@ type SignUpUseCase interface {
 	CreateAccessToken(user UserDTO, secret []byte) (accessToken string, err error)
 	EncryptPassword(password string) (string, error)
 	GetJwtSecret() ([]byte, error)
-
 }

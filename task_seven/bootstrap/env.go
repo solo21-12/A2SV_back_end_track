@@ -14,6 +14,8 @@ type Env struct {
 	MONGO_DATABASE  string `mapstructure:"MONGO_DATABASE"`
 	SERVER_ADDRESS  string `mapstructure:"SERVER_ADDRESS"`
 	USER_COLLECTION string `mapstructure:"USER_COLLECTION"`
+	TASK_COLLECTION string `mapstructure:"TASK_COLLECTION"`
+
 	ALLOWED_USERS   string `mapstructure:"ALLOWED_USERS"`
 }
 
