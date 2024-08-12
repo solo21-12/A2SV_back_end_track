@@ -17,5 +17,7 @@ func Setup(env *bootstrap.Env, db *mongo.Database, gin *gin.Engine) {
 	protectedRouter.Use(infrastructure.AuthMiddleware())
 
 	adminGroup := protectedRouter.Group("")
-	adminGroup.Use(infrastructure.RoleBasedMiddleWare())
+	adminGroup.Use(infrastructure.RoleBasedMiddleWare(env.ALLOWED_USERS))
+
+	NewPromoteRouter(env, db, adminGroup)
 }

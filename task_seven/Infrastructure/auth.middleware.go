@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ const (
 	POST   = "POST"
 	PUT    = "PUT"
 	DELETE = "DELETE"
+	PATCH  = "PATCH"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -19,7 +21,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		_, err := GetClaims(authHeader)
 
 		if err != nil {
-			ctx.JSON(401, gin.H{"error": "Unauthorized"})
+			ctx.JSON(401, gin.H{"error": "Unauthorized" + err.Error()})
 			ctx.Abort()
 			return
 		}
@@ -45,8 +47,10 @@ func RoleBasedMiddleWare(roles ...string) gin.HandlerFunc {
 		method := ctx.Request.Method
 
 		switch method {
-		case POST, DELETE, PUT:
+		case POST, DELETE, PUT, PATCH:
 			authrized := false
+
+			log.Println(userRole, "user role")
 
 			for _, role := range roles {
 				if role == userRole {

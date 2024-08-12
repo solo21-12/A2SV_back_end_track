@@ -22,6 +22,17 @@ func NewUserRepository(db *mongo.Database, collection string) domain.UserReposit
 	}
 }
 
+func (u *userRepository) GetRole(ctx context.Context) string {
+	users, _ := u.GetAllUsers(ctx)
+
+	if len(users) == 0 {
+		return "admin"
+	}
+
+	return "user"
+
+}
+
 func (u *userRepository) GetCollection() *mongo.Collection {
 	return u.db.Collection(u.collection)
 }
@@ -66,12 +77,19 @@ func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain
 func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateRequest) (domain.UserDTO, *domain.ErrorResponse) {
 	collection := u.GetCollection()
 	_, err := u.GetUserEmail(ctx, user.Email)
+	role := u.GetRole(ctx)
 
 	if err == nil {
 		return domain.UserDTO{}, domain.BadRequest("User already exists")
 	}
 
-	inserRes, nErr := collection.InsertOne(ctx, user)
+	newUserCreated := domain.User{
+		Email:    user.Email,
+		Password: user.Password,
+		Role:     role,
+	}
+
+	inserRes, nErr := collection.InsertOne(ctx, newUserCreated)
 
 	if nErr != nil {
 		return domain.UserDTO{}, domain.InternalServerError("Something went wrong")

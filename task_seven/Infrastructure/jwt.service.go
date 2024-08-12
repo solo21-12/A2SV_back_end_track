@@ -2,12 +2,12 @@ package infrastructure
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
+	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
 )
 
 func CreateAccessToken(user domain.UserDTO, secret []byte) (accessToken string, err error) {
@@ -33,13 +33,13 @@ func CreateAccessToken(user domain.UserDTO, secret []byte) (accessToken string, 
 }
 
 func GetJwtSecret() ([]byte, error) {
-	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	env := *bootstrap.NewEnv()
 
-	if len(jwtSecret) == 0 {
+	if len(env.JWT_SECRET) == 0 {
 		return nil, fmt.Errorf("JWT secret is not set")
 	}
 
-	return jwtSecret, nil
+	return []byte(env.JWT_SECRET), nil
 }
 
 func ValidateToken(tokenStr string, jwtSecret []byte) (*domain.JWTCustome, error) {
@@ -61,8 +61,6 @@ func ValidateToken(tokenStr string, jwtSecret []byte) (*domain.JWTCustome, error
 
 	return claims, nil
 }
-
-
 
 func ValidateAuthHeader(authHeader string) ([]string, error) {
 	if authHeader == "" {
@@ -98,5 +96,3 @@ func GetClaims(authHeader string) (*domain.JWTCustome, error) {
 
 	return claims, nil
 }
-
-
