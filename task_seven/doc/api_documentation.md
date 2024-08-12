@@ -99,15 +99,21 @@ To configure MongoDB for your Task Management API, follow these steps:
 
    In the `bootstrap` directory of the project, create a file named `.env`.
 
-2. **Add MongoDB Connection String**
+2. **Add Configuration Variables**
 
-   In the `.env` file, add the following line with your MongoDB connection string:
+   In the `.env` file, add the following lines with your configuration values:
 
    ```plaintext
    MONGO_URL=<your-mongodb-connection-string>
+   MONGO_DATABASE=task_manager
+   SERVER_ADDRESS=:8081
+   USER_COLLECTION=users
+   JWT_SECRET=<your-jwt-secret>
+   ALLOWED_USERS=admin
+   TASK_COLLECTION=tasks
    ```
 
-   Replace `<your-mongodb-connection-string>` with the actual connection string for your MongoDB instance. This string typically looks like `mongodb://username:password@host:port/database`.
+   Replace `<your-mongodb-connection-string>` with the actual connection string for your MongoDB instance. This string typically looks like `mongodb://username:password@host:port/database`. Replace `<your-jwt-secret>` with your secret key for JWT authentication.
 
 ### 2. **Install Required Modules**
 
@@ -125,6 +131,12 @@ Here is an example of what your `.env` file might look like:
 
 ```plaintext
 MONGO_URL=mongodb://username:password@localhost:27017/task_management
+MONGO_DATABASE=task_manager
+SERVER_ADDRESS=:8081
+USER_COLLECTION=users
+JWT_SECRET=your_jwt_secret_key
+ALLOWED_USERS=admin
+TASK_COLLECTION=tasks
 ```
 
 ## Starting the Application
