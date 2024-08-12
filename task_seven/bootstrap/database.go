@@ -2,7 +2,6 @@ package bootstrap
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -15,10 +14,7 @@ func NewMongoDatabase(env *Env) *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	dbUser := env.MONGO_USER
-	dbPassword := env.MONGO_PASSWORD
-
-	dbURL := fmt.Sprintf("mongodb+srv://%s:%s@mongodb-university.fs4tab8.mongodb.net/?retryWrites=true&w=majority&appName=mongodb-university", dbUser, dbPassword)
+	dbURL := env.MONGO_URL
 	clientOptions := options.Client().ApplyURI(dbURL)
 
 	client, err := mongo.Connect(ctx, clientOptions)
