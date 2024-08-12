@@ -24,7 +24,7 @@ func getMember(memberID int) (models.Member, bool) {
 
 func checkBookBorrowed(book models.Book, member models.Member) (int, bool) {
 
-	for i, cur_book := range member.BorrowedBooks {
+	for i, cur_book := range data.OurLibrary.Books {
 		if cur_book == book {
 			return i, true
 		}
@@ -33,6 +33,15 @@ func checkBookBorrowed(book models.Book, member models.Member) (int, bool) {
 	return -1, false
 }
 
+func chekcBorrowed(book models.Book) bool {
+	for _, cur_book := range data.OurLibrary.Books {
+		if cur_book == book && cur_book.Status == BORROWED {
+			return true
+		}
+	}
+
+	return false
+}
 func AddBook(book models.Book) error {
 
 	_, exists := getBook(book.ID)
@@ -84,6 +93,10 @@ func BorrowBook(bookID int, memberID int) error {
 
 	if !memberExist {
 		return fmt.Errorf("the member with the given ID does not exist")
+	}
+
+	if borrowed := chekcBorrowed(book); borrowed {
+		return fmt.Errorf("the book has already been borrowed")
 	}
 
 	book.Status = BORROWED

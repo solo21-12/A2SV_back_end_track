@@ -29,3 +29,12 @@ type TaskRepository interface {
 	DeleteTask(taskID primitive.ObjectID, ctx context.Context) *ErrorResponse
 	UpdateTask(taskID primitive.ObjectID, updatedTask TaskCreateDTO, ctx context.Context) *ErrorResponse
 }
+
+
+type TaskUseCase interface {
+	GetTasks(ctx context.Context) ([]TaskDTO, *ErrorResponse)
+	GetTaskByID(taskID primitive.ObjectID, ctx context.Context) (TaskDTO, *ErrorResponse)
+	CreateTask(newTask TaskCreateDTO, ctx context.Context) (TaskDTO, *ErrorResponse)
+	DeleteTask(taskID primitive.ObjectID, ctx context.Context) *ErrorResponse
+	UpdateTask(taskID primitive.ObjectID, updatedTask TaskCreateDTO, ctx context.Context) *ErrorResponse
+}
