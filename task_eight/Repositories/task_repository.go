@@ -72,12 +72,12 @@ func (t *taskRepository) CreateTask(newTask domain.TaskCreateDTO, ctx context.Co
 		return domain.TaskDTO{}, domain.InternalServerError("Internal server error while inserting the document: " + err.Error())
 	}
 
-	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
+	objectID, ok := inserRes.InsertedID.(string)
 	if !ok {
 		return domain.TaskDTO{}, domain.InternalServerError("Error converting the inserted ID")
 	}
 
-	task, nErr := t.GetTaskByID(objectID.Hex(), ctx)
+	task, nErr := t.GetTaskByID(objectID, ctx)
 	if nErr != nil {
 		return domain.TaskDTO{}, nErr
 	}

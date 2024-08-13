@@ -33,12 +33,12 @@ func (u *userRepository) GetRole(ctx context.Context) string {
 
 }
 
-func (u *userRepository) GetCollection() *mongo.Collection {
+func (u *userRepository) getCollection() *mongo.Collection {
 	return u.db.Collection(u.collection)
 }
 
 func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *domain.ErrorResponse) {
-	collection := u.GetCollection()
+	collection := u.getCollection()
 	opt := options.Find().SetProjection(bson.D{{Key: "password", Value: 0}})
 
 	cur, err := collection.Find(ctx, bson.D{}, opt)
@@ -57,7 +57,7 @@ func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *do
 
 func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain.User, *domain.ErrorResponse) {
 	// opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
-	collection := u.GetCollection()
+	collection := u.getCollection()
 
 	filter := bson.D{{Key: "email", Value: email}}
 	var user domain.User
@@ -75,8 +75,9 @@ func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain
 	return user, nil
 }
 func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateRequest) (domain.UserDTO, *domain.ErrorResponse) {
-	collection := u.GetCollection()
+	collection := u.getCollection()
 	_, err := u.GetUserEmail(ctx, user.Email)
+
 	role := u.GetRole(ctx)
 
 	if err == nil {
@@ -111,7 +112,7 @@ func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateR
 }
 func (u *userRepository) GetUserID(ctx context.Context, id string) (domain.UserDTO, *domain.ErrorResponse) {
 	var user domain.UserDTO
-	collection := u.GetCollection()
+	collection := u.getCollection()
 
 	objectID, cErr := primitive.ObjectIDFromHex(id)
 
@@ -135,7 +136,7 @@ func (u *userRepository) GetUserID(ctx context.Context, id string) (domain.UserD
 	return user, nil
 }
 func (u *userRepository) PromoteUser(ctx context.Context, id string) *domain.ErrorResponse {
-	collection := u.GetCollection()
+	collection := u.getCollection()
 	user, err := u.GetUserID(ctx, id)
 
 	if err != nil {
