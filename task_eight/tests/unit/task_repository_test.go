@@ -1,4 +1,4 @@
-package repositories
+package unit_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
+	repositories "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Repositories"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,7 +29,7 @@ func (suit *TaskRepositorySuite) SetupSuite() {
 	suit.DB = client.Database(env.TEST_DATABASE)
 	suit.Collection = suit.DB.Collection(env.TEST_TASK_COLLECTION)
 	suit.ctx = context.Background()
-	suit.taskRepository = NewTaskRepository(suit.DB, env.TEST_TASK_COLLECTION)
+	suit.taskRepository = repositories.NewTaskRepository(suit.DB, env.TEST_TASK_COLLECTION)
 }
 
 func (suit *TaskRepositorySuite) TearDownSuite() {

@@ -1,10 +1,11 @@
-package repositories
+package unit_test
 
 import (
 	"context"
 	"testing"
 
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
+	repositories "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Repositories"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,7 +29,7 @@ func (suit *UserRepositorySuit) SetupSuite() {
 	suit.Collection = suit.DB.Collection(env.TEST_USER_COLLECTION)
 	suit.ctx = context.Background()
 	suit.ENV = env
-	suit.userRepository = NewUserRepository(suit.DB, env.TEST_USER_COLLECTION)
+	suit.userRepository = repositories.NewUserRepository(suit.DB, env.TEST_USER_COLLECTION)
 }
 
 func (suit *UserRepositorySuit) TearDownSuite() {
