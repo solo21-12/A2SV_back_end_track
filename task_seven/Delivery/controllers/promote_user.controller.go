@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PromoteController struct {
@@ -17,14 +16,8 @@ type PromoteController struct {
 func (p *PromoteController) PromoteUser(ctx *gin.Context) {
 
 	id := ctx.Param("id")
-	objectId, err := primitive.ObjectIDFromHex(id)
 
-	if err != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		return
-	}
-
-	nErr := p.PromoteUseCase.PromoteUser(objectId, ctx)
+	nErr := p.PromoteUseCase.PromoteUser(id, ctx)
 
 	if nErr != nil {
 		ctx.IndentedJSON(nErr.Code, gin.H{"error": nErr.Message})

@@ -34,6 +34,6 @@ type UserRepository interface {
 	GetAllUsers(ctx context.Context) ([]UserDTO, *ErrorResponse)
 	GetUserEmail(ctx context.Context, email string) (User, *ErrorResponse)
 	CreateUser(ctx context.Context, user UserCreateRequest) (UserDTO, *ErrorResponse)
-	GetUserID(ctx context.Context, id primitive.ObjectID) (UserDTO, *ErrorResponse)
-	PromoteUser(ctx context.Context, id primitive.ObjectID) *ErrorResponse
+	GetUserID(ctx context.Context, id string) (UserDTO, *ErrorResponse)
+	PromoteUser(ctx context.Context, id string) *ErrorResponse
 }

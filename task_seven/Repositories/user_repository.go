@@ -95,7 +95,7 @@ func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateR
 		return domain.UserDTO{}, domain.InternalServerError("Something went wrong")
 	}
 
-	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
+	objectID, ok := inserRes.InsertedID.(string)
 
 	if !ok {
 		return domain.UserDTO{}, domain.InternalServerError("Error while converting the id")
@@ -109,11 +109,17 @@ func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateR
 
 	return newUser, nil
 }
-func (u *userRepository) GetUserID(ctx context.Context, id primitive.ObjectID) (domain.UserDTO, *domain.ErrorResponse) {
+func (u *userRepository) GetUserID(ctx context.Context, id string) (domain.UserDTO, *domain.ErrorResponse) {
 	var user domain.UserDTO
 	collection := u.GetCollection()
 
-	filter := bson.D{{Key: "_id", Value: id}}
+	objectID, cErr := primitive.ObjectIDFromHex(id)
+
+	if cErr != nil {
+		return domain.UserDTO{}, domain.InternalServerError("Error converting the id")
+	}
+
+	filter := bson.D{{Key: "_id", Value: objectID}}
 	opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
 
 	err := collection.FindOne(ctx, filter, opts).Decode(&user)
@@ -128,7 +134,7 @@ func (u *userRepository) GetUserID(ctx context.Context, id primitive.ObjectID) (
 
 	return user, nil
 }
-func (u *userRepository) PromoteUser(ctx context.Context, id primitive.ObjectID) *domain.ErrorResponse {
+func (u *userRepository) PromoteUser(ctx context.Context, id string) *domain.ErrorResponse {
 	collection := u.GetCollection()
 	user, err := u.GetUserID(ctx, id)
 

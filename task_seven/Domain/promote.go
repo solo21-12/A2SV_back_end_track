@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PromoteResponse struct {
@@ -11,5 +10,5 @@ type PromoteResponse struct {
 }
 
 type PromoteUseCase interface {
-	PromoteUser(userID primitive.ObjectID, ctx context.Context) *ErrorResponse
+	PromoteUser(userID string, ctx context.Context) *ErrorResponse
 }
