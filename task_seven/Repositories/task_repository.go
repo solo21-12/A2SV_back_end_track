@@ -42,11 +42,17 @@ func (t *taskRepository) GetTasks(ctx context.Context) ([]domain.TaskDTO, *domai
 	return tasks, nil
 }
 
-func (t *taskRepository) GetTaskByID(taskID primitive.ObjectID, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
+func (t *taskRepository) GetTaskByID(taskID string, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
 	collection := t.GetCollection()
-	filter := bson.M{"_id": taskID}
 	var task domain.TaskDTO
 
+	objectID, nErr := primitive.ObjectIDFromHex(taskID)
+
+	if nErr != nil {
+		return domain.TaskDTO{}, domain.InternalServerError("Error converting the given ID")
+	}
+
+	filter := bson.M{"_id": objectID}
 	err := collection.FindOne(ctx, filter).Decode(&task)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -66,7 +72,7 @@ func (t *taskRepository) CreateTask(newTask domain.TaskCreateDTO, ctx context.Co
 		return domain.TaskDTO{}, domain.InternalServerError("Internal server error while inserting the document: " + err.Error())
 	}
 
-	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
+	objectID, ok := inserRes.InsertedID.(string)
 	if !ok {
 		return domain.TaskDTO{}, domain.InternalServerError("Error converting the inserted ID")
 	}
@@ -79,7 +85,7 @@ func (t *taskRepository) CreateTask(newTask domain.TaskCreateDTO, ctx context.Co
 	return task, nil
 }
 
-func (t *taskRepository) DeleteTask(taskID primitive.ObjectID, ctx context.Context) *domain.ErrorResponse {
+func (t *taskRepository) DeleteTask(taskID string, ctx context.Context) *domain.ErrorResponse {
 	collection := t.GetCollection()
 
 	_, err := t.GetTaskByID(taskID, ctx)
@@ -87,7 +93,13 @@ func (t *taskRepository) DeleteTask(taskID primitive.ObjectID, ctx context.Conte
 		return err
 	}
 
-	filter := bson.M{"_id": taskID}
+	objectID, nErr := primitive.ObjectIDFromHex(taskID)
+
+	if nErr != nil {
+		return domain.InternalServerError("Error converting the given ID")
+	}
+
+	filter := bson.M{"_id": objectID}
 	deleteRes, nErr := collection.DeleteOne(ctx, filter)
 	if nErr != nil || deleteRes.DeletedCount == 0 {
 		return domain.InternalServerError("Error deleting task: " + nErr.Error())
@@ -96,10 +108,16 @@ func (t *taskRepository) DeleteTask(taskID primitive.ObjectID, ctx context.Conte
 	return nil
 }
 
-func (t *taskRepository) UpdateTask(taskID primitive.ObjectID, updatedTask domain.TaskCreateDTO, ctx context.Context) *domain.ErrorResponse {
+func (t *taskRepository) UpdateTask(taskID string, updatedTask domain.TaskCreateDTO, ctx context.Context) *domain.ErrorResponse {
 	collection := t.GetCollection()
 
-	filter := bson.M{"_id": taskID}
+	objectID, nErr := primitive.ObjectIDFromHex(taskID)
+
+	if nErr != nil {
+		return domain.InternalServerError("Error converting the given ID")
+	}
+
+	filter := bson.M{"_id": objectID}
 	update := bson.D{{Key: "$set", Value: updatedTask}}
 
 	updatedRes, err := collection.UpdateOne(ctx, filter, update)

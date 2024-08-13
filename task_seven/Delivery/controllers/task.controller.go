@@ -5,17 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TaskController struct {
 	TaskUseCase domain.TaskUseCase
-}
-
-
-func (t *TaskController) convertID(id string) (primitive.ObjectID, error) {
-
-	return primitive.ObjectIDFromHex(id)
 }
 
 func (t *TaskController) Create(ctx *gin.Context) {
@@ -51,14 +44,7 @@ func (t *TaskController) GetAll(ctx *gin.Context) {
 func (t *TaskController) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	objectID, err := t.convertID(id)
-
-	if err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format" + err.Error()})
-		return
-	}
-
-	task, gErr := t.TaskUseCase.GetTaskByID(objectID, ctx)
+	task, gErr := t.TaskUseCase.GetTaskByID(id, ctx)
 
 	if gErr != nil {
 		ctx.IndentedJSON(gErr.Code, gin.H{"error": gErr.Message})
@@ -72,25 +58,19 @@ func (t *TaskController) Update(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var updatedTask domain.TaskCreateDTO
 
-	objectID, oErr := t.convertID(id)
-	if oErr != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid object id" + oErr.Error()})
-		return
-	}
-
 	if err := ctx.ShouldBind(&updatedTask); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid data format" + err.Error()})
 		return
 	}
 
-	err := t.TaskUseCase.UpdateTask(objectID, updatedTask, ctx)
+	err := t.TaskUseCase.UpdateTask(id, updatedTask, ctx)
 
 	if err != nil {
 		ctx.IndentedJSON(err.Code, gin.H{"error": err.Message})
 		return
 	}
 
-	task, _ := t.TaskUseCase.GetTaskByID(objectID, ctx)
+	task, _ := t.TaskUseCase.GetTaskByID(id, ctx)
 
 	ctx.IndentedJSON(http.StatusOK, task)
 
@@ -99,13 +79,7 @@ func (t *TaskController) Update(ctx *gin.Context) {
 func (t *TaskController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	objectID, oErr := t.convertID(id)
-	if oErr != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Invalid object id" + oErr.Error()})
-		return
-	}
-
-	if err := t.TaskUseCase.DeleteTask(objectID, ctx); err != nil {
+	if err := t.TaskUseCase.DeleteTask(id, ctx); err != nil {
 		ctx.IndentedJSON(err.Code, gin.H{"error": err.Message})
 		return
 	}
