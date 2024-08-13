@@ -11,7 +11,8 @@ type ErrorResponse struct {
 }
 
 func (e *ErrorResponse) Error() string {
-	return fmt.Sprintf("Message: %s", e.Message)
+
+	return fmt.Errorf("message: %s", e.Message).Error()
 }
 
 func BadRequest(msg string) *ErrorResponse {

@@ -17,7 +17,7 @@ func NewLoginUseCase(userRespository domain.UserRepository) domain.LoginUseCase 
 	}
 }
 
-func (l *loginUseCase) GetUserEmail(ctx context.Context, email string) (domain.User, *domain.ErrorResponse) {
+func (l *loginUseCase) GetUserEmail(ctx context.Context, email string) (*domain.User, *domain.ErrorResponse) {
 	return l.userRespository.GetUserEmail(ctx, email)
 
 }

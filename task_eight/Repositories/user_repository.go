@@ -23,7 +23,7 @@ func NewUserRepository(db *mongo.Database, collection string) domain.UserReposit
 }
 
 func (u *userRepository) GetRole(ctx context.Context) string {
-	users, _ := u.GetAllUsers(ctx)
+	users, _ := u.getAllUsers(ctx)
 
 	if len(users) == 0 {
 		return "admin"
@@ -37,7 +37,7 @@ func (u *userRepository) getCollection() *mongo.Collection {
 	return u.db.Collection(u.collection)
 }
 
-func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *domain.ErrorResponse) {
+func (u *userRepository) getAllUsers(ctx context.Context) ([]domain.UserDTO, *domain.ErrorResponse) {
 	collection := u.getCollection()
 	opt := options.Find().SetProjection(bson.D{{Key: "password", Value: 0}})
 
@@ -55,7 +55,7 @@ func (u *userRepository) GetAllUsers(ctx context.Context) ([]domain.UserDTO, *do
 	return users, nil
 }
 
-func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain.User, *domain.ErrorResponse) {
+func (u *userRepository) GetUserEmail(ctx context.Context, email string) (*domain.User, *domain.ErrorResponse) {
 	// opts := options.FindOne().SetProjection(bson.D{{Key: "password", Value: 0}})
 	collection := u.getCollection()
 
@@ -66,44 +66,48 @@ func (u *userRepository) GetUserEmail(ctx context.Context, email string) (domain
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return domain.User{}, domain.NotFound("User with the given email not found")
+			return &domain.User{}, domain.NotFound("User with the given email not found")
 		}
 
-		return domain.User{}, domain.InternalServerError("Error fetching user: " + err.Error())
+		return &domain.User{}, domain.InternalServerError("Error fetching user: " + err.Error())
 	}
 
-	return user, nil
+	return &user, nil
 }
 func (u *userRepository) CreateUser(ctx context.Context, user domain.UserCreateRequest) (domain.UserDTO, *domain.ErrorResponse) {
 	collection := u.getCollection()
-	_, err := u.GetUserEmail(ctx, user.Email)
 
-	role := u.GetRole(ctx)
-
-	if err == nil {
+	// Check if the user already exists
+	existingUser, err := u.GetUserEmail(ctx, user.Email)
+	if err == nil && existingUser != nil {
+		// User already exists
 		return domain.UserDTO{}, domain.BadRequest("User already exists")
 	}
 
+	// Get user role
+	role := u.GetRole(ctx)
+
+	// Create new user document
 	newUserCreated := domain.User{
 		Email:    user.Email,
 		Password: user.Password,
 		Role:     role,
 	}
 
-	inserRes, nErr := collection.InsertOne(ctx, newUserCreated)
-
+	// Insert the new user
+	insertRes, nErr := collection.InsertOne(ctx, newUserCreated)
 	if nErr != nil {
 		return domain.UserDTO{}, domain.InternalServerError("Something went wrong")
 	}
 
-	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
-
+	// Convert InsertedID to primitive.ObjectID
+	objectID, ok := insertRes.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return domain.UserDTO{}, domain.InternalServerError("Error while converting the id")
+		return domain.UserDTO{}, domain.InternalServerError("Error while converting the ID")
 	}
 
+	// Fetch the newly created user
 	newUser, eErr := u.GetUserID(ctx, objectID.Hex())
-
 	if eErr != nil {
 		return domain.UserDTO{}, domain.InternalServerError("Error fetching newly created user")
 	}

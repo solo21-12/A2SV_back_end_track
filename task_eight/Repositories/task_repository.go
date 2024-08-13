@@ -21,12 +21,12 @@ func NewTaskRepository(db *mongo.Database, collection string) domain.TaskReposit
 	}
 }
 
-func (t *taskRepository) GetCollection() *mongo.Collection {
+func (t *taskRepository) getCollection() *mongo.Collection {
 	return t.db.Collection(t.collection)
 }
 
 func (t *taskRepository) GetTasks(ctx context.Context) ([]domain.TaskDTO, *domain.ErrorResponse) {
-	collection := t.GetCollection()
+	collection := t.getCollection()
 	var tasks []domain.TaskDTO
 
 	cur, err := collection.Find(ctx, bson.D{})
@@ -43,7 +43,7 @@ func (t *taskRepository) GetTasks(ctx context.Context) ([]domain.TaskDTO, *domai
 }
 
 func (t *taskRepository) GetTaskByID(taskID string, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
-	collection := t.GetCollection()
+	collection := t.getCollection()
 	var task domain.TaskDTO
 
 	objectID, nErr := primitive.ObjectIDFromHex(taskID)
@@ -65,19 +65,19 @@ func (t *taskRepository) GetTaskByID(taskID string, ctx context.Context) (domain
 }
 
 func (t *taskRepository) CreateTask(newTask domain.TaskCreateDTO, ctx context.Context) (domain.TaskDTO, *domain.ErrorResponse) {
-	collection := t.GetCollection()
+	collection := t.getCollection()
 
 	inserRes, err := collection.InsertOne(ctx, newTask)
 	if err != nil {
 		return domain.TaskDTO{}, domain.InternalServerError("Internal server error while inserting the document: " + err.Error())
 	}
 
-	objectID, ok := inserRes.InsertedID.(string)
+	objectID, ok := inserRes.InsertedID.(primitive.ObjectID)
 	if !ok {
 		return domain.TaskDTO{}, domain.InternalServerError("Error converting the inserted ID")
 	}
 
-	task, nErr := t.GetTaskByID(objectID, ctx)
+	task, nErr := t.GetTaskByID(objectID.Hex(), ctx)
 	if nErr != nil {
 		return domain.TaskDTO{}, nErr
 	}
@@ -86,7 +86,7 @@ func (t *taskRepository) CreateTask(newTask domain.TaskCreateDTO, ctx context.Co
 }
 
 func (t *taskRepository) DeleteTask(taskID string, ctx context.Context) *domain.ErrorResponse {
-	collection := t.GetCollection()
+	collection := t.getCollection()
 
 	_, err := t.GetTaskByID(taskID, ctx)
 	if err != nil {
@@ -109,7 +109,7 @@ func (t *taskRepository) DeleteTask(taskID string, ctx context.Context) *domain.
 }
 
 func (t *taskRepository) UpdateTask(taskID string, updatedTask domain.TaskCreateDTO, ctx context.Context) *domain.ErrorResponse {
-	collection := t.GetCollection()
+	collection := t.getCollection()
 
 	objectID, nErr := primitive.ObjectIDFromHex(taskID)
 
