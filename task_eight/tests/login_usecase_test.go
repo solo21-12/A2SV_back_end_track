@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type loginUseCaseSuite struct {
+type loginControllerSuite struct {
 	suite.Suite
 	repository    *mocks.MockUserRepository
 	signupUseCase domain.SignUpUseCase
@@ -24,7 +24,7 @@ type loginUseCaseSuite struct {
 	ENV           *bootstrap.Env
 }
 
-func (suite *loginUseCaseSuite) SetupTest() {
+func (suite *loginControllerSuite) SetupTest() {
 	suite.ctrl = gomock.NewController(suite.T())
 	suite.ctx = context.Background()
 	suite.repository = mocks.NewMockUserRepository(suite.ctrl)
@@ -33,11 +33,11 @@ func (suite *loginUseCaseSuite) SetupTest() {
 	suite.ENV = bootstrap.NewEnv()
 }
 
-func (suite *loginUseCaseSuite) TearDownTest() {
+func (suite *loginControllerSuite) TearDownTest() {
 	suite.ctrl.Finish()
 }
 
-func (suite *loginUseCaseSuite) getUser() (*domain.User, *domain.ErrorResponse) {
+func (suite *loginControllerSuite) getUser() (*domain.User, *domain.ErrorResponse) {
 	suite.repository.
 		EXPECT().
 		GetUserEmail(gomock.Any(), constants.TestEmail).
@@ -46,22 +46,21 @@ func (suite *loginUseCaseSuite) getUser() (*domain.User, *domain.ErrorResponse) 
 	return suite.usecase.GetUserEmail(suite.ctx, constants.TestEmail)
 }
 
-func (suite *loginUseCaseSuite) validatePassword(password, hashedPassword string, expected bool) {
+func (suite *loginControllerSuite) validatePassword(password, hashedPassword string, expected bool) {
 	valid := suite.usecase.ValidatePassword(password, hashedPassword)
 	suite.Equal(expected, valid, "Password validation result mismatch")
 }
 
-func (suite *loginUseCaseSuite) hashPassword(password string) (string, error) {
+func (suite *loginControllerSuite) hashPassword(password string) (string, error) {
 	return suite.signupUseCase.EncryptPassword(password)
 }
 
-func (suite *loginUseCaseSuite) createTestUser(err *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
-	
+func (suite *loginControllerSuite) createTestUser(err *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
+
 	userReq := domain.UserCreateRequest{
 		Email:    constants.TestEmail,
 		Password: constants.TestPassword,
 	}
-
 
 	createdUser := domain.UserDTO{
 		ID:    primitive.NewObjectID(),
@@ -77,7 +76,7 @@ func (suite *loginUseCaseSuite) createTestUser(err *domain.ErrorResponse) (domai
 	return suite.signupUseCase.CreateUser(suite.ctx, userReq)
 }
 
-func (suite *loginUseCaseSuite) TestGetUserEmail() {
+func (suite *loginControllerSuite) TestGetUserEmail() {
 	_, err := suite.createTestUser(nil)
 	suite.Nil(err, "Error creating user")
 
@@ -87,7 +86,7 @@ func (suite *loginUseCaseSuite) TestGetUserEmail() {
 
 }
 
-func (suite *loginUseCaseSuite) TestGetUserEmail_NotFound() {
+func (suite *loginControllerSuite) TestGetUserEmail_NotFound() {
 	suite.repository.
 		EXPECT().
 		GetUserEmail(gomock.Any(), constants.InvalidEmail).
@@ -100,7 +99,7 @@ func (suite *loginUseCaseSuite) TestGetUserEmail_NotFound() {
 	suite.Contains(retErr.Message, "User not found", "Error message mismatch")
 }
 
-func (suite *loginUseCaseSuite) TestCreateAccessToken() {
+func (suite *loginControllerSuite) TestCreateAccessToken() {
 	user, err := suite.createTestUser(nil)
 	suite.Nil(err, "Error creating user")
 
@@ -108,14 +107,14 @@ func (suite *loginUseCaseSuite) TestCreateAccessToken() {
 	suite.Nil(aErr, "Error creating access token")
 }
 
-func (suite *loginUseCaseSuite) TestValidatePassword_Valid() {
+func (suite *loginControllerSuite) TestValidatePassword_Valid() {
 	hashedPassword, err := suite.hashPassword(constants.TestPassword)
 	suite.Nil(err, "Error hashing password")
 
 	suite.validatePassword(constants.TestPassword, hashedPassword, true)
 }
 
-func (suite *loginUseCaseSuite) TestValidatePassword_Invalid() {
+func (suite *loginControllerSuite) TestValidatePassword_Invalid() {
 	hashedPassword, err := suite.hashPassword(constants.TestPassword)
 	suite.Nil(err, "Error hashing password")
 
@@ -123,5 +122,5 @@ func (suite *loginUseCaseSuite) TestValidatePassword_Invalid() {
 }
 
 func TestLoginUseCase(t *testing.T) {
-	suite.Run(t, new(loginUseCaseSuite))
+	suite.Run(t, new(loginControllerSuite))
 }
