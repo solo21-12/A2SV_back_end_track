@@ -8,15 +8,9 @@ import (
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
 	usecases "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/UseCases"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
+	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/constants"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/mocks"
 	"github.com/stretchr/testify/suite"
-)
-
-const (
-	testEmail       = "test@gmail.com"
-	testPassword    = "strongpassword"
-	invalidEmail    = "foo@gmail.com"
-	invalidPassword = "wrongpassword"
 )
 
 type loginUseCaseSuite struct {
@@ -44,8 +38,8 @@ func (suite *loginUseCaseSuite) TearDownTest() {
 
 func (suite *loginUseCaseSuite) createTestUser(errMess *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
 	userReq := domain.UserCreateRequest{
-		Email:    testEmail,
-		Password: testPassword,
+		Email:    constants.TestEmail,
+		Password: constants.TestPassword,
 	}
 
 	suite.repository.EXPECT().
@@ -59,10 +53,10 @@ func (suite *loginUseCaseSuite) createTestUser(errMess *domain.ErrorResponse) (d
 func (suite *loginUseCaseSuite) getUser() (*domain.User, *domain.ErrorResponse) {
 	suite.repository.
 		EXPECT().
-		GetUserEmail(gomock.Any(), testEmail).
-		Return(&domain.User{Email: testEmail}, nil)
+		GetUserEmail(gomock.Any(), constants.TestEmail).
+		Return(&domain.User{Email: constants.TestEmail}, nil)
 
-	return suite.usecase.GetUserEmail(suite.ctx, testEmail)
+	return suite.usecase.GetUserEmail(suite.ctx, constants.TestEmail)
 }
 
 func (suite *loginUseCaseSuite) validatePassword(password, hashedPassword string, expected bool) {
@@ -86,10 +80,10 @@ func (suite *loginUseCaseSuite) TestGetUserEmail() {
 func (suite *loginUseCaseSuite) TestGetUserEmail_NotFound() {
 	suite.repository.
 		EXPECT().
-		GetUserEmail(gomock.Any(), invalidEmail).
+		GetUserEmail(gomock.Any(), constants.InvalidEmail).
 		Return(&domain.User{}, &domain.ErrorResponse{Message: "User not found"})
 
-	retrievedUser, retErr := suite.usecase.GetUserEmail(suite.ctx, invalidEmail)
+	retrievedUser, retErr := suite.usecase.GetUserEmail(suite.ctx, constants.InvalidEmail)
 
 	suite.Error(retErr, "Expected error not received")
 	suite.Equal(&domain.User{}, retrievedUser, "Retrieved user should be empty")
@@ -105,17 +99,17 @@ func (suite *loginUseCaseSuite) TestCreateAccessToken() {
 }
 
 func (suite *loginUseCaseSuite) TestValidatePassword_Valid() {
-	hashedPassword, err := suite.hashPassword(testPassword)
+	hashedPassword, err := suite.hashPassword(constants.TestPassword)
 	suite.Nil(err, "Error hashing password")
 
-	suite.validatePassword(testPassword, hashedPassword, true)
+	suite.validatePassword(constants.TestPassword, hashedPassword, true)
 }
 
 func (suite *loginUseCaseSuite) TestValidatePassword_Invalid() {
-	hashedPassword, err := suite.hashPassword(testPassword)
+	hashedPassword, err := suite.hashPassword(constants.TestPassword)
 	suite.Nil(err, "Error hashing password")
 
-	suite.validatePassword(invalidPassword, hashedPassword, false)
+	suite.validatePassword(constants.InvalidPassword, hashedPassword, false)
 }
 
 func TestLoginUseCase(t *testing.T) {

@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+
 	// "log"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 	domain "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/Domain"
 	usecases "github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/UseCases"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/bootstrap"
+	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/constants"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/mocks"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/crypto/bcrypt"
@@ -37,11 +39,12 @@ func (suite *signUpUseCaseSuite) TearDownTest() {
 
 func (suite *signUpUseCaseSuite) createTestUser(errMess *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
 	userReq := domain.UserCreateRequest{
-		Email:    "test@gmail.com",
-		Password: "strongpassword",
+		Email:    constants.TestEmail,
+		Password: constants.TestPassword,
 	}
 
-	suite.repository.EXPECT().
+	suite.repository.
+		EXPECT().
 		CreateUser(gomock.Any(), userReq).
 		Return(domain.UserDTO{}, errMess).
 		Times(1)
