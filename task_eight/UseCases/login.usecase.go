@@ -25,8 +25,8 @@ func (l *loginUseCase) CreateAccessToken(user domain.UserDTO, secret []byte) (ac
 	return infrastructure.CreateAccessToken(user, secret)
 
 }
-func (l *loginUseCase) ValidatePassword(password string, userPassword string) bool {
-	return infrastructure.ValidatePassword(password, userPassword)
+func (l *loginUseCase) ValidatePassword(password string, hashedPassword string) bool {
+	return infrastructure.ValidatePassword(password, hashedPassword)
 }
 
 func (l *loginUseCase) GetJwtSecret() ([]byte, error) {

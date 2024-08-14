@@ -17,6 +17,6 @@ type LoginResponse struct {
 type LoginUseCase interface {
 	GetUserEmail(ctx context.Context, email string) (*User, *ErrorResponse)
 	CreateAccessToken(user UserDTO, secret []byte) (accessToken string, err error)
-	ValidatePassword(password string, userPassword string) bool
+	ValidatePassword(password string, hashedPassword string) bool
 	GetJwtSecret() ([]byte, error)
 }
