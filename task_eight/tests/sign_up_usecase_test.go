@@ -43,8 +43,7 @@ func (suite *signUpUseCaseSuite) createTestUser(errMess *domain.ErrorResponse) (
 		Password: constants.TestPassword,
 	}
 
-	suite.repository.
-		EXPECT().
+	suite.repository.EXPECT().
 		CreateUser(gomock.Any(), userReq).
 		Return(domain.UserDTO{}, errMess).
 		Times(1)

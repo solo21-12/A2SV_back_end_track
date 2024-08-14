@@ -11,6 +11,7 @@ import (
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/constants"
 	"github.com/solo21-12/A2SV_back_end_track/tree/main/task_seven/tests/mocks"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type loginUseCaseSuite struct {
@@ -36,20 +37,6 @@ func (suite *loginUseCaseSuite) TearDownTest() {
 	suite.ctrl.Finish()
 }
 
-func (suite *loginUseCaseSuite) createTestUser(errMess *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
-	userReq := domain.UserCreateRequest{
-		Email:    constants.TestEmail,
-		Password: constants.TestPassword,
-	}
-
-	suite.repository.EXPECT().
-		CreateUser(gomock.Any(), userReq).
-		Return(domain.UserDTO{}, errMess).
-		Times(1)
-
-	return suite.signupUseCase.CreateUser(suite.ctx, userReq)
-}
-
 func (suite *loginUseCaseSuite) getUser() (*domain.User, *domain.ErrorResponse) {
 	suite.repository.
 		EXPECT().
@@ -68,12 +55,35 @@ func (suite *loginUseCaseSuite) hashPassword(password string) (string, error) {
 	return suite.signupUseCase.EncryptPassword(password)
 }
 
+func (suite *loginUseCaseSuite) createTestUser(err *domain.ErrorResponse) (domain.UserDTO, *domain.ErrorResponse) {
+	
+	userReq := domain.UserCreateRequest{
+		Email:    constants.TestEmail,
+		Password: constants.TestPassword,
+	}
+
+
+	createdUser := domain.UserDTO{
+		ID:    primitive.NewObjectID(),
+		Email: userReq.Email,
+		Role:  "admin",
+	}
+
+	suite.repository.EXPECT().
+		CreateUser(gomock.Any(), userReq).
+		Return(createdUser, err).
+		Times(1)
+
+	return suite.signupUseCase.CreateUser(suite.ctx, userReq)
+}
+
 func (suite *loginUseCaseSuite) TestGetUserEmail() {
 	_, err := suite.createTestUser(nil)
 	suite.Nil(err, "Error creating user")
 
-	_, retErr := suite.getUser()
+	user, retErr := suite.getUser()
 	suite.Nil(retErr, "Error retrieving user")
+	suite.NotEmpty(user, "The retrieved user shouldn't be empty")
 
 }
 
