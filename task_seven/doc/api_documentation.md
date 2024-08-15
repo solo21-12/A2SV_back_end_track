@@ -1,3 +1,4 @@
+
 # Task Management API Documentation
 
 You can find the comprehensive documentation for the Task Management API at the following link:
@@ -6,16 +7,47 @@ You can find the comprehensive documentation for the Task Management API at the 
 
 This documentation includes details on all available endpoints, request payloads, response formats, and error handling.
 
+## Configuration Instructions
+
+### 1. **Running the Project**
+
+To start the project, including MongoDB, ensure Docker is installed on your system and use the following commands:
+
+1. **Run the Project**
+
+   Start the project and MongoDB container using:
+
+   ```bash
+   make run
+   ```
+
+2. **Stop the Project**
+
+   Stop the project and MongoDB container with:
+
+   ```bash
+   make stop
+   ```
+
+3. **View Logs**
+
+   Check the logs for the project and MongoDB by running:
+
+   ```bash
+   make logs
+   ```
+
 ## Authentication
 
 ### 1. **User Registration**
 
 To register a new user, send a POST request to `/register` with the following payload:
 
-**Endpoint:** `/register`  
+**Endpoint:** /register  
 **Method:** POST  
 **Headers:**  
-- `Content-Type: application/json`
+
+- Content-Type: application/json
 
 **Request Body:**
 
@@ -36,10 +68,11 @@ To register a new user, send a POST request to `/register` with the following pa
 
 To log in and receive an access token, send a POST request to `/login` with the following payload:
 
-**Endpoint:** `/login`  
+**Endpoint:** /login  
 **Method:** POST  
 **Headers:**  
-- `Content-Type: application/json`
+
+- Content-Type: application/json
 
 **Request Body:**
 
@@ -67,7 +100,7 @@ To log in and receive an access token, send a POST request to `/login` with the 
 
 ### 3. **Authenticated Requests**
 
-After logging in, use the access token provided to authenticate subsequent requests. Include the token in the `Authorization` header as a Bearer token.
+After logging in, use the access token provided to authenticate subsequent requests. Include the token in the Authorization header as a Bearer token.
 
 **Header Format:**
 
@@ -88,64 +121,6 @@ Authorization: Bearer your_jwt_token_here
 - **200 OK**: Authorized request.
 - **401 Unauthorized**: Invalid or missing token.
 - **403 Forbidden**: Insufficient permissions.
-
-## Configuration Instructions
-
-### 1. **MongoDB Configuration**
-
-To configure MongoDB for your Task Management API, follow these steps:
-
-1. **Create a `.env` File**
-
-   In the `bootstrap` directory of the project, create a file named `.env`.
-
-2. **Add Configuration Variables**
-
-   In the `.env` file, add the following lines with your configuration values:
-
-   ```plaintext
-   MONGO_URL=<your-mongodb-connection-string>
-   MONGO_DATABASE=task_manager
-   SERVER_ADDRESS=:8081
-   USER_COLLECTION=users
-   JWT_SECRET=<your-jwt-secret>
-   ALLOWED_USERS=admin
-   TASK_COLLECTION=tasks
-   ```
-
-   Replace `<your-mongodb-connection-string>` with the actual connection string for your MongoDB instance. This string typically looks like `mongodb://username:password@host:port/database`. Replace `<your-jwt-secret>` with your secret key for JWT authentication.
-
-### 2. **Install Required Modules**
-
-To install the required Go modules for the Task Management API, run the following command in your terminal:
-
-```bash
-go get .
-```
-
-This command will fetch and install all dependencies specified in your `go.mod` file.
-
-## Example `.env` File
-
-Here is an example of what your `.env` file might look like:
-
-```plaintext
-MONGO_URL=mongodb://username:password@localhost:27017/task_management
-MONGO_DATABASE=task_manager
-SERVER_ADDRESS=:8081
-USER_COLLECTION=users
-JWT_SECRET=your_jwt_secret_key
-ALLOWED_USERS=admin
-TASK_COLLECTION=tasks
-```
-
-## Starting the Application
-
-Ensure that you have your `.env` file configured correctly and all required Go modules installed. You can then start your application using the following command:
-
-```bash
-go run main.go
-```
 
 ## Folder Structure
 
