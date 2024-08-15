@@ -89,48 +89,30 @@ Authorization: Bearer your_jwt_token_here
 - **401 Unauthorized**: Invalid or missing token.
 - **403 Forbidden**: Insufficient permissions.
 
-## Configuration Instructions
-
-### 1. **MongoDB Configuration**
-
-To configure MongoDB for your Task Management API, follow these steps:
-
-1. **Create a `.env` File**
-
-   In the task five directory of the project, create a file named `.env`.
-
-2. **Add MongoDB Connection String**
-
-   In the `.env` file, add the following line with your MongoDB connection string:
-
-   ```plaintext
-   MONGO_URL=<your-mongodb-connection-string>
-   ```
-
-   Replace `<your-mongodb-connection-string>` with the actual connection string for your MongoDB instance. This string typically looks like `mongodb://username:password@host:port/database`.
-
-### 2. **Install Required Modules**
-
-To install the required Go modules for the Task Management API, run the following command in your terminal:
-
-```bash
-go get .
-```
-
-This command will fetch and install all dependencies specified in your `go.mod` file.
-
-## Example `.env` File
-
-Here is an example of what your `.env` file might look like:
-
-```plaintext
-MONGO_URL=mongodb://username:password@localhost:27017/task_management
-```
-
 ## Starting the Application
 
-Ensure that you have your `.env` file configured correctly and all required Go modules installed. You can then start your application using the following command:
+To run the server, navigate to the project folder and use the following commands:
 
-```bash
-go run main.go
-```
+- `make run`: Starts the server.
+- `make stop`: Stops the server.
+- `make logs`: Displays the server logs.
+
+## Database Configuration
+
+This project uses MongoDB as the database. Instead of manually configuring MongoDB, the database is set up using a Docker container. 
+
+### Requirements
+
+- **Docker**: Ensure that Docker is installed on your system.
+
+### Docker Commands
+
+Use the following commands to manage the MongoDB container:
+
+- `make run`: Starts the MongoDB container along with the application.
+- `make stop`: Stops the MongoDB container along with the application.
+- `make logs`: Displays logs from the running container.
+
+Make sure Docker is running on your system, and then use these commands to easily set up and manage the database.
+
+---
