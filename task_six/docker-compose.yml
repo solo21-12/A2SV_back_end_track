@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-manager
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URL: "mongodb://mongo:27017/task_manager"
+      MONGO_DATABASE: "task_manager"
+      SERVER_ADDRESS: ":8081"
+      USER_COLLECTION: "users"
+      JWT_SECRET: "b37df767fedf114b3f326deb59fa27f1b7bcc1c94a4f99a6b5f7423165b5fb0d"
+      ALLOWED_USERS: "admin"
+      TASK_COLLECTION: "tasks"
+      TEST_DATABASE: "test_db"
+      TEST_USER_COLLECTION: "user_test"
+      TEST_TASK_COLLECTION: "task_test"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

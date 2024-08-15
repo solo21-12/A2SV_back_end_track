@@ -5,21 +5,15 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func ConnectMongo() *mongo.Database {
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	mongoURL := os.Getenv("MONGO_URL")
 
 	if mongoURL == "" {
-		log.Fatal("MONGO_URL is not set in .env file")
+		log.Fatal("MONGO_URL is not set in the environment")
 	}
 
 	// options
@@ -39,5 +33,4 @@ func ConnectMongo() *mongo.Database {
 	}
 
 	return client.Database("task_manager")
-
 }
